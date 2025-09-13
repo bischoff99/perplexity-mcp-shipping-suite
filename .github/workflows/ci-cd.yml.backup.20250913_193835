@@ -1,0 +1,231 @@
+name: 'CI/CD Pipeline'
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    name: 'Test & Lint'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        service: [easypost, veeqo]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install workspace dependencies
+        working-directory: ${{ matrix.service }}
+        run: npm ci
+
+      - name: Run TypeScript type check
+        working-directory: ${{ matrix.service }}
+        run: npm run typecheck
+
+      - name: Run linting
+        working-directory: ${{ matrix.service }}
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ${{ matrix.service }}
+        run: npm run test:coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ${{ matrix.service }}/coverage/lcov.info
+          flags: ${{ matrix.service }}
+          name: codecov-${{ matrix.service }}
+
+  security:
+    name: 'Security Scan'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  build:
+    name: 'Build & Push Images'
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    strategy:
+      matrix:
+        service: [easypost, veeqo, web]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          file: ./${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  deploy-staging:
+    name: 'Deploy to Staging'
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: Deploy to staging
+        working-directory: k8s
+        run: |
+          export KUBECONFIG=../kubeconfig
+          ./deploy.sh staging
+        env:
+          EASYPOST_API_KEY: ${{ secrets.EASYPOST_API_KEY_STAGING }}
+          VEEQO_API_KEY: ${{ secrets.VEEQO_API_KEY_STAGING }}
+          VEEQO_WEBHOOK_SECRET: ${{ secrets.VEEQO_WEBHOOK_SECRET_STAGING }}
+
+      - name: Run E2E tests
+        run: |
+          export KUBECONFIG=kubeconfig
+          npm run test:e2e
+        env:
+          TEST_BASE_URL: https://staging.example.com
+
+  deploy-production:
+    name: 'Deploy to Production'
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: Deploy to production
+        working-directory: k8s
+        run: |
+          export KUBECONFIG=../kubeconfig
+          ./deploy.sh production
+        env:
+          EASYPOST_API_KEY: ${{ secrets.EASYPOST_API_KEY }}
+          VEEQO_API_KEY: ${{ secrets.VEEQO_API_KEY }}
+          VEEQO_WEBHOOK_SECRET: ${{ secrets.VEEQO_WEBHOOK_SECRET }}
+
+      - name: Verify deployment
+        run: |
+          export KUBECONFIG=kubeconfig
+          kubectl rollout status deployment/easypost-mcp -n perplexity-production
+          kubectl rollout status deployment/veeqo-mcp -n perplexity-production
+          kubectl rollout status deployment/web-interface -n perplexity-production
+
+      - name: Run smoke tests
+        run: |
+          npm run test:smoke
+        env:
+          TEST_BASE_URL: https://api.example.com
+
+  notify:
+    name: 'Notifications'
+    needs: [deploy-production, deploy-staging]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify Slack on success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: '🚀 Deployment successful!'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: '❌ Deployment failed!'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

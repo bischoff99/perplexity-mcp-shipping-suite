@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+build/
+**/build/
+.nx/
+
+# Generated files
+*.generated.*
+**/*.generated.*
+
+# Coverage reports
+coverage/
+**/coverage/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.test
+
+# Logs
+*.log
+**/*.log
+
+# Package manager files
+pnpm-lock.yaml
+**/pnpm-lock.yaml

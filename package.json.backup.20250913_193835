@@ -41,14 +41,7 @@
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "install:all": "pnpm install",
-    "setup": "pnpm install && nx run-many -t build --projects=shared,mcp-client,ui-components",
-    "prepare": "husky",
-    "commit": "git-cz",
-    "precommit": "lint-staged",
-    "health": "curl -f http://localhost:3000/health && curl -f http://localhost:3002/health && curl -f http://localhost:3003/health || echo \"Some services are not healthy\"",
-    "docker:clean": "docker-compose down -v --remove-orphans && docker system prune -f",
-    "quick-start": "pnpm install && pnpm run build:libs && pnpm run dev",
-    "quick-test": "pnpm run lint && pnpm run typecheck && pnpm run test"
+    "setup": "pnpm install && nx run-many -t build --projects=shared,mcp-client,ui-components"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",
@@ -85,13 +78,7 @@
     "typescript": "~5.9.2",
     "vite": "^7.0.0",
     "vite-plugin-dts": "~4.5.0",
-    "vitest": "^3.0.0",
-    "@commitlint/cli": "^17.6.7",
-    "@commitlint/config-conventional": "^17.6.7",
-    "commitizen": "^4.3.0",
-    "cz-conventional-changelog": "^3.3.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.3"
+    "vitest": "^3.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -117,25 +104,5 @@
     "next": "~15.5.3",
     "react": "19.1.1",
     "react-dom": "19.1.1"
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
-    ]
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
-  "packageManager": "pnpm@8.15.5"
+  }
 }
