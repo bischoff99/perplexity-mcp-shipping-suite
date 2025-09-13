@@ -1,0 +1,60 @@
+# Ignore sensitive files and directories from GitHub Copilot suggestions
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+secrets/
+
+# API Keys and credentials
+**/api-keys/
+**/credentials/
+**/*secrets*
+**/*private*
+
+# Build artifacts
+dist/
+build/
+node_modules/
+.nx/cache/
+*.tsbuildinfo
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# Test coverage and reports
+coverage/
+.nyc_output/
+test-results/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+.npm/
+.yarn/
+
+# IDE specific files
+.vscode/launch.json
+.idea/
+
+# Docker volumes and data
+docker-data/
+volumes/
+
+# Backup files
+*.backup
+*.bak
+
+# OS generated files
+.DS_Store
+Thumbs.db

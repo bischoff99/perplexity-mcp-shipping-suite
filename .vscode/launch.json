@@ -1,0 +1,113 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug EasyPost MCP Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/easypost/src/index.ts",
+      "outFiles": ["${workspaceFolder}/apps/easypost/dist/**/*.js"],
+      "runtimeArgs": [
+        "--loader", 
+        "ts-node/esm"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      },
+      "envFile": "${workspaceFolder}/.env.development",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Debug Veeqo MCP Server",
+      "type": "node", 
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/veeqo/src/index.ts",
+      "outFiles": ["${workspaceFolder}/apps/veeqo/dist/**/*.js"],
+      "runtimeArgs": [
+        "--loader",
+        "ts-node/esm"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      },
+      "envFile": "${workspaceFolder}/.env.development",
+      "console": "integratedTerminal", 
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Debug Web Dashboard",
+      "type": "node",
+      "request": "launch", 
+      "program": "${workspaceFolder}/apps/web-dashboard/src/main.ts",
+      "outFiles": ["${workspaceFolder}/apps/web-dashboard/dist/**/*.js"],
+      "runtimeArgs": [
+        "--loader",
+        "ts-node/esm"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      },
+      "envFile": "${workspaceFolder}/.env.development",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**", 
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Test EasyPost",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--config",
+        "${workspaceFolder}/apps/easypost/jest.config.cjs",
+        "--runInBand"
+      ],
+      "cwd": "${workspaceFolder}/apps/easypost",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "test"
+      }
+    },
+    {
+      "name": "Test Veeqo",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--config",
+        "${workspaceFolder}/apps/veeqo/jest.config.cjs", 
+        "--runInBand"
+      ],
+      "cwd": "${workspaceFolder}/apps/veeqo",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug All MCP Servers",
+      "configurations": [
+        "Debug EasyPost MCP Server",
+        "Debug Veeqo MCP Server"
+      ],
+      "stopAll": true
+    }
+  ]
+}
