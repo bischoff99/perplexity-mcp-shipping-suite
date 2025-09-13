@@ -150,3 +150,23 @@ Required environment variables:
 - Connection pooling for HTTP clients
 - Rate limiting with Bottleneck library
 - Target response time: <200ms
+
+## GitHub Copilot Integration
+
+### Configuration Files
+- `.github/copilot-instructions.md` - Comprehensive project context for Copilot
+- `.vscode/settings.json` - Copilot-specific VS Code settings
+- `.copilotignore` - Files to exclude from Copilot suggestions
+- `.vscode/launch.json` - Debug configurations for all services
+
+### Using Copilot Effectively
+- Copilot is configured with MCP protocol patterns and shipping domain knowledge
+- Use descriptive comments to guide Copilot suggestions
+- Leverage Copilot Chat for complex refactoring and architecture questions
+- Copilot understands the monorepo structure and shared libraries
+
+### Best Practices with Copilot
+- Review all generated code for security and business logic correctness
+- Validate API integrations against actual service documentation
+- Test generated code thoroughly, especially error handling
+- Use Copilot for boilerplate code, tests, and documentation

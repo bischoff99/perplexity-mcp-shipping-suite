@@ -113,6 +113,27 @@ docker-compose down
 
 ## 🛠️ Development
 
+### GitHub Copilot Integration
+
+This repository is fully configured for GitHub Copilot with:
+- **Comprehensive project context** in `.github/copilot-instructions.md`
+- **VS Code workspace configuration** with optimized settings
+- **Code snippets** for common MCP patterns
+- **Debug configurations** for all services
+- **Security exclusions** via `.copilotignore`
+
+**Getting Started with Copilot:**
+```bash
+# Install required extensions
+code --install-extension github.copilot
+code --install-extension github.copilot-chat
+
+# Open the configured workspace
+code .vscode/perplexity-mcp.code-workspace
+```
+
+See [GitHub Copilot Guide](./docs/github-copilot-guide.md) for detailed usage instructions.
+
 ### Project Structure
 
 ```
