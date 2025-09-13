@@ -4,7 +4,7 @@
 # =============================================================================
 
 # Stage 1: Dependencies and build
-FROM node:18-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -40,7 +40,7 @@ RUN pnpm prune --prod
 
 # =============================================================================
 # Stage 2: Production runtime
-FROM node:18-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S easypost && \
