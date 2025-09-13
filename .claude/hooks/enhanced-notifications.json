@@ -1,0 +1,16 @@
+{
+  "description": "Enhanced notification system with desktop notifications and audio feedback for Claude.ai web users",
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n\n# Read notification data\ninput=$(cat)\nmessage=$(echo \"$input\" | jq -r '.message // \"Claude Code notification\"')\ntimestamp=$(date '+%H:%M:%S')\n\n# Log notification\necho \"[$timestamp] Notification: $message\" >> ~/.claude/logs/notifications.log\n\n# Desktop notification (cross-platform)\nif command -v notify-send >/dev/null 2>&1; then\n    # Linux\n    notify-send \"🤖 Claude Code\" \"$message\" --icon=info --expire-time=5000\nelif command -v osascript >/dev/null 2>&1; then\n    # macOS\n    osascript -e \"display notification \\\"$message\\\" with title \\\"🤖 Claude Code\\\" sound name \\\"Ping\\\"\"\nelif command -v powershell.exe >/dev/null 2>&1; then\n    # Windows (WSL)\n    powershell.exe -Command \"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('$message', 'Claude Code', 'OK', 'Information')\"\nfi\n\n# Audio feedback with system beep\nif echo \"$message\" | grep -qi \"waiting\\|input\\|prompt\"; then\n    # Double beep for user input needed\n    printf \"\\a\" && sleep 0.2 && printf \"\\a\"\nelse\n    # Single beep for general notifications\n    printf \"\\a\"\nfi\n\n# Success indicator\necho \"📬 Notification sent: $message\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "description": "Enhanced prompt validation, context injection, and logging optimized for Claude.ai web users",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n\n# Read JSON input from stdin\ninput=$(cat)\necho \"$input\" > /tmp/claude_prompt_input.json\n\n# Extract prompt and session info\nprompt=$(echo \"$input\" | jq -r '.prompt // \"\"')\nsession_id=$(echo \"$input\" | jq -r '.session_id // \"unknown\"')\ntimestamp=$(date -Iseconds)\n\n# Log prompt submission\necho \"[$(date)] Session: $session_id - Prompt submitted: ${prompt:0:100}...\" >> ~/.claude/logs/prompt_submissions.log\n\n# Context injection for coding requests\nif echo \"$prompt\" | grep -qi \"\\(code\\|implement\\|function\\|class\\|debug\\|fix\\|create\\|build\\)\"; then\n    echo \"📋 **Development Context Added:**\"\n    echo \"- Project: $(basename \"$(pwd)\")\"\n    echo \"- Branch: $(git branch --show-current 2>/dev/null || echo 'not a git repo')\"\n    echo \"- Time: $timestamp\"\n    echo \"- Session: ${session_id:0:8}...\"\n    echo \"- Standards: Follow clean code principles and include error handling\"\n    echo \"---\"\nfi\n\n# Add productivity tips for specific contexts\nif echo \"$prompt\" | grep -qi \"\\(refactor\\|optimize\\|performance\\)\"; then\n    echo \"⚡ **Optimization Focus:** Profile before optimizing, measure impact\"\n    echo \"---\"\nfi\n\nif echo \"$prompt\" | grep -qi \"\\(test\\|spec\\|coverage\\)\"; then\n    echo \"🧪 **Testing Reminder:** Aim for meaningful tests that validate behavior\"\n    echo \"---\"\nfi\n\nif echo \"$prompt\" | grep -qi \"\\(security\\|auth\\|encrypt\\|vulnerability\\)\"; then\n    echo \"🔒 **Security Alert:** Review for common vulnerabilities (OWASP Top 10)\"\n    echo \"---\"\nfi\n\n# Simple prompt validation for Claude.ai web users\nif echo \"$prompt\" | grep -qi \"\\(password\\|secret\\|api[_-]key\\|token\\).*[:=]\"; then\n    echo \"⚠️  **Security Warning:** Your prompt may contain sensitive information. Please review before proceeding.\"\n    echo \"---\"\nfi\n\nexit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

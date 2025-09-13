@@ -1,0 +1,15 @@
+{
+  "description": "Enhanced completion feedback with productivity insights and session summaries for Claude.ai users",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n\n# Read stop hook data\ninput=$(cat)\nstop_active=$(echo \"$input\" | jq -r '.stop_hook_active // \"false\"')\ntimestamp=$(date '+%Y-%m-%d %H:%M:%S')\nsession_id=$(date +%s | tail -c 6)\n\n# Log completion\necho \"[$timestamp] Claude Code session completed\" >> ~/.claude/logs/completions.log\n\n# Generate completion message with variety\ncompletion_messages=(\n    \"✨ Task completed successfully! Ready for your next challenge.\"\n    \"🎯 Great work! Your code is looking sharp.\"\n    \"🚀 Mission accomplished! What's next on your development journey?\"\n    \"💫 Excellent! Your project is moving forward nicely.\"\n    \"🔥 Solid progress made! Keep up the momentum.\"\n    \"⭐ Task wrapped up! Ready to tackle the next feature?\"\n    \"🎉 Well done! Your codebase is evolving beautifully.\"\n)\n\n# Select random completion message\nmessage_index=$((RANDOM % ${#completion_messages[@]}))\ncompletion_msg=\"${completion_messages[$message_index]}\"\n\n# Add productivity tip occasionally (30% chance)\nif [ $((RANDOM % 10)) -lt 3 ]; then\n    productivity_tips=(\n        \"💡 Tip: Consider adding unit tests for better code reliability.\"\n        \"📝 Tip: Document complex logic for future you and your team.\"\n        \"🔍 Tip: Review your changes before committing for quality assurance.\"\n        \"⚡ Tip: Regular refactoring keeps your codebase healthy.\"\n        \"🎨 Tip: Consistent formatting makes code more readable.\"\n        \"🛡️ Tip: Always validate user inputs for security.\"\n        \"🧪 Tip: Integration tests catch issues between components.\"\n    )\n    tip_index=$((RANDOM % ${#productivity_tips[@]}))\n    productivity_tip=\"\\n${productivity_tips[$tip_index]}\"\nelse\n    productivity_tip=\"\"\nfi\n\n# Display completion message\necho -e \"\\n🎊 $completion_msg$productivity_tip\"\n\n# Show session summary if multiple interactions\nif [ -f ~/.claude/logs/prompt_submissions.log ]; then\n    today_count=$(grep \"$(date '+%Y-%m-%d')\" ~/.claude/logs/prompt_submissions.log | wc -l)\n    if [ \"$today_count\" -gt 1 ]; then\n        echo \"📊 Today's productivity: $today_count interactions completed\"\n    fi\nfi\n\n# Gentle audio feedback for completion\nprintf \"\\a\" && sleep 0.1 && printf \"\\a\" && sleep 0.1 && printf \"\\a\"\n\nexit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

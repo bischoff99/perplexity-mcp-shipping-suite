@@ -1,0 +1,185 @@
+services:
+  # Redis for caching
+  redis:
+    image: redis:7.2-alpine
+    container_name: perplexity-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL for persistent storage
+  postgres:
+    image: postgres:15-alpine
+    container_name: perplexity-postgres
+    environment:
+      POSTGRES_DB: perplexity_mcp
+      POSTGRES_USER: perplexity
+      POSTGRES_PASSWORD: perplexity_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U perplexity -d perplexity_mcp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # EasyPost MCP Server
+  easypost-mcp:
+    build:
+      context: ./easypost
+      dockerfile: Dockerfile
+    container_name: perplexity-easypost-mcp
+    environment:
+      - NODE_ENV=production
+      - EASYPOST_API_KEY=${EASYPOST_API_KEY}
+      - EASYPOST_TIMEOUT=${EASYPOST_TIMEOUT:-30000}
+      - EASYPOST_RETRY_ATTEMPTS=${EASYPOST_RETRY_ATTEMPTS:-3}
+      - ENABLE_CACHE=${ENABLE_CACHE:-true}
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=${EASYPOST_PORT:-3000}
+    ports:
+      - "${EASYPOST_PORT:-3000}:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Veeqo MCP Server
+  veeqo-mcp:
+    build:
+      context: ./veeqo
+      dockerfile: Dockerfile
+    container_name: perplexity-veeqo-mcp
+    environment:
+      - NODE_ENV=production
+      - VEEQO_API_KEY=${VEEQO_API_KEY}
+      - VEEQO_API_URL=${VEEQO_API_URL:-https://api.veeqo.com}
+      - VEEQO_TIMEOUT=${VEEQO_TIMEOUT:-30000}
+      - VEEQO_RETRY_ATTEMPTS=${VEEQO_RETRY_ATTEMPTS:-3}
+      - ENABLE_CACHE=${ENABLE_CACHE:-true}
+      - REDIS_URL=redis://redis:6379
+      - ENABLE_WEBHOOKS=${ENABLE_WEBHOOKS:-true}
+      - WEBHOOK_PORT=${WEBHOOK_PORT:-3001}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=${VEEQO_PORT:-3002}
+    ports:
+      - "${VEEQO_PORT:-3002}:3002"
+      - "${WEBHOOK_PORT:-3001}:3001"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Web Interface
+  web-interface:
+    image: nginx:1.25-alpine
+    container_name: perplexity-web-interface
+    ports:
+      - "${WEB_PORT:-3003}:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - easypost-mcp
+      - veeqo-mcp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus for metrics (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: perplexity-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: perplexity-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Security scanning service (optional)
+  security-scan:
+    image: aquasec/trivy:latest
+    container_name: perplexity-security-scan
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - trivy-cache:/root/.cache/trivy
+    command: >
+      sh -c "
+        echo 'Scanning images for vulnerabilities...' &&
+        trivy image --exit-code 1 --severity HIGH,CRITICAL redis:7.2-alpine postgres:15-alpine nginx:1.25-alpine &&
+        echo 'Security scan completed successfully'
+      "
+    profiles:
+      - security
+    depends_on:
+      - redis
+      - postgres
+      - web-interface
+
+volumes:
+  redis_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+  trivy-cache:
+
+networks:
+  default:
+    name: perplexity-network

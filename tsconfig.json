@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/veeqo/libs/shared"
+    },
+    {
+      "path": "./libs/mcp-client"
+    },
+    {
+      "path": "./libs/ui-components"
+    },
+    {
+      "path": "./apps/web-dashboard-e2e"
+    },
+    {
+      "path": "./apps/web-dashboard"
+    }
+  ]
+}

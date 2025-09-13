@@ -1,0 +1,525 @@
+# =============================================================================
+# Production Docker Compose Configuration
+# MCP Shipping Automation Platform
+# =============================================================================
+
+networks:
+  mcp-shipping-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+    labels:
+      - "app=mcp-shipping-suite"
+
+volumes:
+  redis_data:
+    driver: local
+    labels:
+      - "app=redis"
+      - "component=cache"
+  postgres_data:
+    driver: local
+    labels:
+      - "app=postgres"
+      - "component=database"
+  prometheus_data:
+    driver: local
+    labels:
+      - "app=prometheus"
+      - "component=monitoring"
+  grafana_data:
+    driver: local
+    labels:
+      - "app=grafana"
+      - "component=monitoring"
+  trivy-cache:
+    driver: local
+    labels:
+      - "app=trivy"
+      - "component=security"
+
+services:
+  # =============================================================================
+  # Infrastructure Services
+  # =============================================================================
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: mcp-shipping-redis
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly yes
+      - --requirepass ${REDIS_PASSWORD:-}
+      - --maxmemory 512mb
+      - --maxmemory-policy allkeys-lru
+      - --tcp-keepalive 60
+      - --timeout 300
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    labels:
+      - "app=redis"
+      - "component=cache"
+      - "environment=production"
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: mcp-shipping-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mcp_shipping}
+      POSTGRES_USER: ${POSTGRES_USER:-mcp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mcp_user} -d ${POSTGRES_DB:-mcp_shipping}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    labels:
+      - "app=postgres"
+      - "component=database"
+      - "environment=production"
+
+  # =============================================================================
+  # Application Services
+  # =============================================================================
+
+  easypost-mcp:
+    build:
+      context: ./easypost
+      dockerfile: Dockerfile
+      target: runtime
+      args:
+        BUILD_VERSION: ${BUILD_VERSION:-1.0.0}
+        BUILD_DATE: ${BUILD_DATE}
+        GIT_COMMIT: ${GIT_COMMIT}
+        GIT_BRANCH: ${GIT_BRANCH:-main}
+    image: ${REGISTRY:-localhost}/easypost-mcp:${IMAGE_TAG:-latest}
+    container_name: mcp-shipping-easypost
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      # Core configuration
+      NODE_ENV: production
+      PORT: 3000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+      # EasyPost API configuration
+      EASYPOST_API_KEY: ${EASYPOST_API_KEY}
+      EASYPOST_TIMEOUT: ${EASYPOST_TIMEOUT:-30000}
+      EASYPOST_RETRY_ATTEMPTS: ${EASYPOST_RETRY_ATTEMPTS:-3}
+
+      # Caching configuration
+      ENABLE_CACHE: ${ENABLE_CACHE:-true}
+      REDIS_URL: redis://redis:6379
+
+      # Performance settings
+      MAX_CONCURRENT_REQUESTS: ${MAX_CONCURRENT_REQUESTS:-100}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-300}
+
+      # Security settings
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+      MAX_REQUEST_BODY_SIZE: ${MAX_REQUEST_BODY_SIZE:-10485760}
+    ports:
+      - "${EASYPOST_PORT:-3000}:3000"
+    volumes:
+      - ./logs/easypost:/app/logs:rw
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+      replicas: 2
+    labels:
+      - "app=easypost-mcp"
+      - "component=api-server"
+      - "environment=production"
+
+  veeqo-mcp:
+    build:
+      context: ./veeqo
+      dockerfile: Dockerfile
+      target: runtime
+      args:
+        BUILD_VERSION: ${BUILD_VERSION:-1.0.0}
+        BUILD_DATE: ${BUILD_DATE}
+        GIT_COMMIT: ${GIT_COMMIT}
+        GIT_BRANCH: ${GIT_BRANCH:-main}
+    image: ${REGISTRY:-localhost}/veeqo-mcp:${IMAGE_TAG:-latest}
+    container_name: mcp-shipping-veeqo
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      # Core configuration
+      NODE_ENV: production
+      PORT: 3000
+      WEBHOOK_PORT: 3001
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+      # Veeqo API configuration
+      VEEQO_API_KEY: ${VEEQO_API_KEY}
+      VEEQO_API_URL: ${VEEQO_API_URL:-https://api.veeqo.com}
+      VEEQO_TIMEOUT: ${VEEQO_TIMEOUT:-30000}
+      VEEQO_RETRY_ATTEMPTS: ${VEEQO_RETRY_ATTEMPTS:-3}
+
+      # Caching configuration
+      ENABLE_CACHE: ${ENABLE_CACHE:-true}
+      REDIS_URL: redis://redis:6379
+
+      # Database configuration
+      DATABASE_URL: postgres://${POSTGRES_USER:-mcp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mcp_shipping}
+
+      # Webhook configuration
+      ENABLE_WEBHOOKS: ${ENABLE_WEBHOOKS:-true}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+
+      # Performance settings
+      MAX_CONCURRENT_REQUESTS: ${MAX_CONCURRENT_REQUESTS:-100}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-300}
+
+      # Security settings
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+      MAX_REQUEST_BODY_SIZE: ${MAX_REQUEST_BODY_SIZE:-10485760}
+    ports:
+      - "${VEEQO_PORT:-3002}:3000"
+      - "${WEBHOOK_PORT:-3001}:3001"
+    volumes:
+      - ./logs/veeqo:/app/logs:rw
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+      replicas: 2
+    labels:
+      - "app=veeqo-mcp"
+      - "component=api-server"
+      - "environment=production"
+
+  web-interface:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: runtime
+      args:
+        BUILD_VERSION: ${BUILD_VERSION:-1.0.0}
+        BUILD_DATE: ${BUILD_DATE}
+        GIT_COMMIT: ${GIT_COMMIT}
+        GIT_BRANCH: ${GIT_BRANCH:-main}
+    image: ${REGISTRY:-localhost}/web-interface:${IMAGE_TAG:-latest}
+    container_name: mcp-shipping-web
+    restart: unless-stopped
+    depends_on:
+      - easypost-mcp
+      - veeqo-mcp
+    environment:
+      NGINX_WORKER_PROCESSES: auto
+      NGINX_WORKER_CONNECTIONS: 1024
+    ports:
+      - "${WEB_PORT:-80}:80"
+    volumes:
+      - ./logs/nginx:/var/log/nginx:rw
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+      replicas: 3
+    labels:
+      - "app=web-interface"
+      - "component=frontend"
+      - "environment=production"
+
+  # =============================================================================
+  # Monitoring Services (Optional)
+  # =============================================================================
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: mcp-shipping-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    profiles:
+      - monitoring
+    labels:
+      - "app=prometheus"
+      - "component=monitoring"
+      - "environment=production"
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: mcp-shipping-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_USERS_ALLOW_ORG_CREATE: false
+      GF_USERS_AUTO_ASSIGN_ORG: true
+      GF_USERS_AUTO_ASSIGN_ORG_ROLE: Viewer
+      GF_INSTALL_PLUGINS: grafana-kubernetes-app,redis-datasource,postgres-datasource
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    profiles:
+      - monitoring
+    labels:
+      - "app=grafana"
+      - "component=monitoring"
+      - "environment=production"
+
+  # =============================================================================
+  # Reverse Proxy / Load Balancer (Optional)
+  # =============================================================================
+
+  nginx-proxy:
+    image: nginx:1.25-alpine
+    container_name: mcp-shipping-nginx-proxy
+    restart: unless-stopped
+    depends_on:
+      - web-interface
+      - easypost-mcp
+      - veeqo-mcp
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx-proxy:/var/log/nginx:rw
+    networks:
+      - mcp-shipping-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    profiles:
+      - proxy
+    labels:
+      - "app=nginx-proxy"
+      - "component=load-balancer"
+      - "environment=production"
+
+  # Security scanning service for production
+  security-scan:
+    image: aquasec/trivy:latest
+    container_name: mcp-shipping-security-scan
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - trivy-cache:/root/.cache/trivy
+    command: >
+      sh -c "
+        echo 'Scanning production images for vulnerabilities...' &&
+        trivy image --exit-code 1 --severity HIGH,CRITICAL redis:7.2-alpine postgres:15-alpine nginx:1.25-alpine &&
+        echo 'Production security scan completed successfully'
+      "
+    profiles:
+      - security
+    networks:
+      - mcp-shipping-network
+    labels:
+      - "app=security-scan"
+      - "component=security"
+      - "environment=production"
+
+# =============================================================================
+# Configuration Examples and Usage
+# =============================================================================
+
+# Start basic services:
+# docker-compose -f docker-compose.production.yml up -d
+
+# Start with monitoring:
+# docker-compose -f docker-compose.production.yml --profile monitoring up -d
+
+# Start with proxy:
+# docker-compose -f docker-compose.production.yml --profile proxy up -d
+
+# Start full stack:
+# docker-compose -f docker-compose.production.yml --profile monitoring --profile proxy up -d
+
+# Scale services:
+# docker-compose -f docker-compose.production.yml up -d --scale easypost-mcp=3 --scale veeqo-mcp=3
+
+# View logs:
+# docker-compose -f docker-compose.production.yml logs -f
+
+# Stop all services:
+# docker-compose -f docker-compose.production.yml down
+
+# Stop and remove volumes (DANGER - deletes data):
+# docker-compose -f docker-compose.production.yml down -v
+
+# =============================================================================
+# Environment Variables Reference
+# =============================================================================
+
+# Required:
+# - EASYPOST_API_KEY
+# - VEEQO_API_KEY
+# - POSTGRES_PASSWORD
+# - WEBHOOK_SECRET
+# - GRAFANA_PASSWORD
+
+# Optional (with defaults):
+# - BUILD_VERSION=1.0.0
+# - IMAGE_TAG=latest
+# - REGISTRY=localhost
+# - LOG_LEVEL=info
+# - REDIS_PASSWORD=""
+# - POSTGRES_DB=mcp_shipping
+# - POSTGRES_USER=mcp_user
+# - ENABLE_CACHE=true
+# - MAX_CONCURRENT_REQUESTS=100
+# - RATE_LIMIT_PER_MINUTE=300
+
+# Ports:
+# - REDIS_PORT=6379
+# - POSTGRES_PORT=5432
+# - EASYPOST_PORT=3000
+# - VEEQO_PORT=3002
+# - WEBHOOK_PORT=3001
+# - WEB_PORT=80
+# - PROMETHEUS_PORT=9090
+# - GRAFANA_PORT=3001
+# - NGINX_HTTP_PORT=80
+# - NGINX_HTTPS_PORT=443

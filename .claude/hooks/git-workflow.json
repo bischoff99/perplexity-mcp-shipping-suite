@@ -1,0 +1,27 @@
+{
+  "description": "Automated git workflow - stage changes and check status",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if git rev-parse --git-dir > /dev/null 2>&1; then echo '📁 Git: Staging changes...'; git add \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null; git status --porcelain | head -10; echo '💡 Use \"git commit -m \\\"your message\\\"\" to commit changes'; else echo 'ℹ️  Not in a git repository'; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if git rev-parse --git-dir > /dev/null 2>&1 && [[ -f \"$CLAUDE_TOOL_FILE_PATH\" ]]; then echo '🔍 Checking file status before edit:'; git status \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || echo 'File not tracked by git'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

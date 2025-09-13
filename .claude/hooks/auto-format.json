@@ -1,0 +1,32 @@
+{
+  "description": "Auto-format code files after editing with language-specific tools",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_FILE_PATH\" == *.py ]]; then echo '🐍 Formatting Python...'; python -m ruff format \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || echo 'Ruff not available'; python -m black \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || echo 'Black not available'; fi"
+          },
+          {
+            "type": "command", 
+            "command": "if [[ \"$CLAUDE_TOOL_FILE_PATH\" == *.js || \"$CLAUDE_TOOL_FILE_PATH\" == *.ts || \"$CLAUDE_TOOL_FILE_PATH\" == *.jsx || \"$CLAUDE_TOOL_FILE_PATH\" == *.tsx ]]; then echo '⚡ Formatting JS/TS...'; npx prettier --write \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || echo 'Prettier not available'; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_FILE_PATH\" == *.json ]]; then echo '📋 Formatting JSON...'; npx prettier --write \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || python -m json.tool \"$CLAUDE_TOOL_FILE_PATH\" > temp.json && mv temp.json \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || echo 'JSON formatting tools not available'; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_FILE_PATH\" == *.go ]]; then echo '🔧 Formatting Go...'; go fmt \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || echo 'Go not available'; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_FILE_PATH\" == *.rs ]]; then echo '🦀 Formatting Rust...'; rustfmt \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || echo 'Rustfmt not available'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,197 @@
+version: '3.8'
+
+services:
+  # EasyPost MCP Server
+  easypost-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: easypost-mcp-server
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - EASYPOST_API_KEY=${EASYPOST_API_KEY}
+      - EASYPOST_TIMEOUT=30000
+      - EASYPOST_RETRY_ATTEMPTS=3
+      - ENABLE_CACHE=true
+      - LOG_LEVEL=info
+    env_file:
+      - .env
+    volumes:
+      # Mount source code for development (hot reload)
+      - .:/app
+      - /app/node_modules
+      - ./logs:/app/logs
+    command: npm run dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - easypost-network
+    depends_on:
+      - redis
+    
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: easypost-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - easypost-network
+
+  # PostgreSQL for application data (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: easypost-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=easypost_mcp
+      - POSTGRES_USER=easypost
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-easypost123}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U easypost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - easypost-network
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: easypost-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - easypost-network
+    profiles:
+      - monitoring
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: easypost-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=redis-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - easypost-network
+    profiles:
+      - monitoring
+
+  # Test runner service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: easypost-test-runner
+    environment:
+      - NODE_ENV=test
+      - EASYPOST_API_KEY=${EASYPOST_TEST_API_KEY:-EZAK_test_fake_key}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./coverage:/app/coverage
+    command: npm run test:coverage
+    profiles:
+      - testing
+    networks:
+      - easypost-network
+
+  # Load testing with Artillery
+  load-tester:
+    image: artilleryio/artillery:latest
+    container_name: easypost-load-tester
+    volumes:
+      - ./load-tests:/scripts
+    command: run /scripts/load-test.yml
+    depends_on:
+      - easypost-mcp
+    networks:
+      - easypost-network
+    profiles:
+      - load-testing
+
+networks:
+  easypost-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# Development commands:
+# Start basic development environment:
+#   docker-compose up easypost-mcp redis
+#
+# Start with monitoring:
+#   docker-compose --profile monitoring up
+#
+# Run tests:
+#   docker-compose --profile testing up test-runner
+#
+# Run load tests:
+#   docker-compose --profile load-testing up load-tester
+#
+# View logs:
+#   docker-compose logs -f easypost-mcp
+#
+# Scale the service:
+#   docker-compose up --scale easypost-mcp=3
+#
+# Clean up:
+#   docker-compose down -v --remove-orphans

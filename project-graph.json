@@ -1,0 +1,848 @@
+{
+  "graph": {
+    "nodes": {
+      "web-dashboard-e2e": {
+        "name": "web-dashboard-e2e",
+        "type": "app",
+        "data": {
+          "root": "apps/web-dashboard-e2e",
+          "name": "web-dashboard-e2e",
+          "tags": [
+            "npm:private"
+          ],
+          "implicitDependencies": [
+            "web-dashboard"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "web-dashboard-e2e",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "targets": {}
+        }
+      },
+      "ui-components": {
+        "name": "ui-components",
+        "type": "lib",
+        "data": {
+          "root": "libs/ui-components",
+          "name": "ui-components",
+          "tags": [
+            "npm:public"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "ui-components",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "perplexity-mcp-shipping-suite": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./dist/index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "web-dashboard": {
+        "name": "web-dashboard",
+        "type": "app",
+        "data": {
+          "root": "apps/web-dashboard",
+          "name": "web-dashboard",
+          "tags": [
+            "npm:private",
+            "type:app",
+            "scope:web-dashboard"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "dev",
+                "start",
+                "test:watch"
+              ]
+            },
+            "js": {
+              "packageName": "web-dashboard",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "targets": {
+            "dev": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "dev"
+              },
+              "metadata": {
+                "scriptContent": "next dev -p 3004",
+                "runCommand": "pnpm run dev"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "start"
+              },
+              "metadata": {
+                "scriptContent": "next start -p 3004",
+                "runCommand": "pnpm run start"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:watch": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:watch"
+              },
+              "metadata": {
+                "scriptContent": "jest --watch",
+                "runCommand": "pnpm run test:watch"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/next:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "outputPath": "dist/apps/web-dashboard"
+              },
+              "configurations": {
+                "development": {
+                  "outputPath": "apps/web-dashboard"
+                },
+                "production": {}
+              },
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/next:server",
+              "defaultConfiguration": "development",
+              "options": {
+                "buildTarget": "web-dashboard:build",
+                "dev": true,
+                "port": 3003
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "web-dashboard:build:development",
+                  "dev": true
+                },
+                "production": {
+                  "buildTarget": "web-dashboard:build:production",
+                  "dev": false
+                }
+              },
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/next:export",
+              "options": {
+                "buildTarget": "web-dashboard:build:production"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/web-dashboard/jest.config.js",
+                "passWithNoTests": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "apps/web-dashboard/**/*.{ts,tsx,js,jsx}"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/web-dashboard/src",
+          "projectType": "application",
+          "implicitDependencies": []
+        }
+      },
+      "mcp-client": {
+        "name": "mcp-client",
+        "type": "lib",
+        "data": {
+          "root": "libs/mcp-client",
+          "name": "mcp-client",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "mcp-client",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "perplexity-mcp-shipping-suite": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./dist/index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "targets": {},
+          "implicitDependencies": []
+        }
+      },
+      "@mcp-shipping/easypost-mcp-server": {
+        "name": "@mcp-shipping/easypost-mcp-server",
+        "type": "lib",
+        "data": {
+          "root": "apps/easypost",
+          "name": "@mcp-shipping/easypost-mcp-server",
+          "tags": [
+            "npm:public",
+            "npm:mcp",
+            "npm:model-context-protocol",
+            "npm:easypost",
+            "npm:shipping",
+            "npm:api",
+            "npm:json-rpc",
+            "npm:typescript",
+            "npm:docker"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "build",
+                "dev",
+                "start",
+                "clean",
+                "typecheck",
+                "test",
+                "test:watch",
+                "test:coverage",
+                "test:e2e",
+                "lint",
+                "lint:fix",
+                "format",
+                "format:check",
+                "docker:build",
+                "docker:run",
+                "precommit",
+                "prepublishOnly"
+              ]
+            },
+            "description": "Production-ready EasyPost MCP Server implementing Model Context Protocol for shipping automation",
+            "js": {
+              "packageName": "@mcp-shipping/easypost-mcp-server",
+              "packageMain": "dist/index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "targets": {
+            "build": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "build"
+              },
+              "metadata": {
+                "scriptContent": "tsc --build",
+                "runCommand": "pnpm run build"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "dev": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "dev"
+              },
+              "metadata": {
+                "scriptContent": "tsx --watch src/index.ts",
+                "runCommand": "pnpm run dev"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "start"
+              },
+              "metadata": {
+                "scriptContent": "node dist/index.js",
+                "runCommand": "pnpm run start"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "clean": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "clean"
+              },
+              "metadata": {
+                "scriptContent": "rm -rf dist coverage",
+                "runCommand": "pnpm run clean"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "typecheck": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "typecheck"
+              },
+              "metadata": {
+                "scriptContent": "tsc --noEmit",
+                "runCommand": "pnpm run typecheck"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test"
+              },
+              "metadata": {
+                "scriptContent": "jest --passWithNoTests",
+                "runCommand": "pnpm run test"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "test:watch": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:watch"
+              },
+              "metadata": {
+                "scriptContent": "jest --watch",
+                "runCommand": "pnpm run test:watch"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:coverage": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:coverage"
+              },
+              "metadata": {
+                "scriptContent": "jest --coverage --passWithNoTests",
+                "runCommand": "pnpm run test:coverage"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e"
+              },
+              "metadata": {
+                "scriptContent": "jest --config jest.e2e.config.js --passWithNoTests",
+                "runCommand": "pnpm run test:e2e"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "lint"
+              },
+              "metadata": {
+                "scriptContent": "eslint src tests --ext .ts",
+                "runCommand": "pnpm run lint"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            },
+            "lint:fix": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "lint:fix"
+              },
+              "metadata": {
+                "scriptContent": "eslint src tests --ext .ts --fix",
+                "runCommand": "pnpm run lint:fix"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "format": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "format"
+              },
+              "metadata": {
+                "scriptContent": "prettier --write src tests",
+                "runCommand": "pnpm run format"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "format:check": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "format:check"
+              },
+              "metadata": {
+                "scriptContent": "prettier --check src tests",
+                "runCommand": "pnpm run format:check"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "docker:build": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "docker:build"
+              },
+              "metadata": {
+                "scriptContent": "docker build -t easypost-mcp .",
+                "runCommand": "pnpm run docker:build"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "docker:run": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "docker:run"
+              },
+              "metadata": {
+                "scriptContent": "docker run -p 3000:3000 --env-file .env easypost-mcp",
+                "runCommand": "pnpm run docker:run"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "precommit": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "precommit"
+              },
+              "metadata": {
+                "scriptContent": "npm run lint && npm run typecheck && npm run test",
+                "runCommand": "pnpm run precommit"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "prepublishOnly": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "prepublishOnly"
+              },
+              "metadata": {
+                "scriptContent": "npm run clean && npm run build && npm run test",
+                "runCommand": "pnpm run prepublishOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "@mcp-shipping/veeqo-mcp-server": {
+        "name": "@mcp-shipping/veeqo-mcp-server",
+        "type": "lib",
+        "data": {
+          "root": "apps/veeqo",
+          "name": "@mcp-shipping/veeqo-mcp-server",
+          "tags": [
+            "npm:public",
+            "npm:mcp",
+            "npm:model-context-protocol",
+            "npm:veeqo",
+            "npm:inventory",
+            "npm:ecommerce",
+            "npm:api",
+            "npm:json-rpc",
+            "npm:typescript",
+            "npm:docker",
+            "npm:orders",
+            "npm:products",
+            "npm:warehouse",
+            "npm:webhooks"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "build",
+                "dev",
+                "start",
+                "clean",
+                "typecheck",
+                "test",
+                "test:watch",
+                "test:coverage",
+                "test:e2e",
+                "lint",
+                "lint:fix",
+                "format",
+                "format:check",
+                "docker:build",
+                "docker:run",
+                "precommit",
+                "prepublishOnly",
+                "webhook:dev"
+              ]
+            },
+            "description": "Production-ready Veeqo MCP Server implementing Model Context Protocol for inventory management and order automation",
+            "js": {
+              "packageName": "@mcp-shipping/veeqo-mcp-server",
+              "packageMain": "dist/index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "targets": {
+            "build": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "build"
+              },
+              "metadata": {
+                "scriptContent": "tsc --build",
+                "runCommand": "pnpm run build"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "dev": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "dev"
+              },
+              "metadata": {
+                "scriptContent": "tsx --watch src/index.ts",
+                "runCommand": "pnpm run dev"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "start"
+              },
+              "metadata": {
+                "scriptContent": "node dist/index.js",
+                "runCommand": "pnpm run start"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "clean": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "clean"
+              },
+              "metadata": {
+                "scriptContent": "rm -rf dist coverage",
+                "runCommand": "pnpm run clean"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "typecheck": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "typecheck"
+              },
+              "metadata": {
+                "scriptContent": "tsc --noEmit",
+                "runCommand": "pnpm run typecheck"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test"
+              },
+              "metadata": {
+                "scriptContent": "jest --passWithNoTests",
+                "runCommand": "pnpm run test"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "test:watch": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:watch"
+              },
+              "metadata": {
+                "scriptContent": "jest --watch",
+                "runCommand": "pnpm run test:watch"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:coverage": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:coverage"
+              },
+              "metadata": {
+                "scriptContent": "jest --coverage --passWithNoTests",
+                "runCommand": "pnpm run test:coverage"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e"
+              },
+              "metadata": {
+                "scriptContent": "jest --config jest.e2e.config.js --passWithNoTests",
+                "runCommand": "pnpm run test:e2e"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "lint"
+              },
+              "metadata": {
+                "scriptContent": "eslint src tests --ext .ts",
+                "runCommand": "pnpm run lint"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            },
+            "lint:fix": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "lint:fix"
+              },
+              "metadata": {
+                "scriptContent": "eslint src tests --ext .ts --fix",
+                "runCommand": "pnpm run lint:fix"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "format": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "format"
+              },
+              "metadata": {
+                "scriptContent": "prettier --write src tests",
+                "runCommand": "pnpm run format"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "format:check": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "format:check"
+              },
+              "metadata": {
+                "scriptContent": "prettier --check src tests",
+                "runCommand": "pnpm run format:check"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "docker:build": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "docker:build"
+              },
+              "metadata": {
+                "scriptContent": "docker build -t veeqo-mcp .",
+                "runCommand": "pnpm run docker:build"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "docker:run": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "docker:run"
+              },
+              "metadata": {
+                "scriptContent": "docker run -p 3000:3000 --env-file .env veeqo-mcp",
+                "runCommand": "pnpm run docker:run"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "precommit": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "precommit"
+              },
+              "metadata": {
+                "scriptContent": "npm run lint && npm run typecheck && npm run test",
+                "runCommand": "pnpm run precommit"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "prepublishOnly": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "prepublishOnly"
+              },
+              "metadata": {
+                "scriptContent": "npm run clean && npm run build && npm run test",
+                "runCommand": "pnpm run prepublishOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "webhook:dev": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "webhook:dev"
+              },
+              "metadata": {
+                "scriptContent": "npm run dev -- --webhook-port=3001",
+                "runCommand": "pnpm run webhook:dev"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      }
+    },
+    "dependencies": {
+      "web-dashboard-e2e": [
+        {
+          "source": "web-dashboard-e2e",
+          "target": "web-dashboard",
+          "type": "implicit"
+        }
+      ],
+      "ui-components": [],
+      "web-dashboard": [],
+      "mcp-client": [],
+      "@mcp-shipping/easypost-mcp-server": [],
+      "@mcp-shipping/veeqo-mcp-server": []
+    }
+  }
+}

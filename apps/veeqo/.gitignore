@@ -1,0 +1,564 @@
+# =============================================================================
+# Veeqo MCP Server - Git Ignore File
+# Comprehensive ignore patterns for TypeScript, Node.js, and production deployment
+# =============================================================================
+
+# =============================================================================
+# Dependencies and Package Managers
+# =============================================================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Package manager lock files (keep one, ignore others)
+# yarn.lock
+# pnpm-lock.yaml
+
+# =============================================================================
+# Build Artifacts and Compiled Code
+# =============================================================================
+
+# TypeScript compiled output
+dist/
+build/
+*.tsbuildinfo
+*.d.ts.map
+
+# Webpack and bundlers
+.webpack/
+.parcel-cache/
+.cache/
+
+# =============================================================================
+# Development and Editor Files
+# =============================================================================
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# =============================================================================
+# Environment and Configuration
+# =============================================================================
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+
+# Configuration files with secrets
+config/local.json
+config/production.json
+secrets.json
+
+# =============================================================================
+# Logs and Runtime Data
+# =============================================================================
+
+# Log files and directories
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime data
+lib-cov/
+coverage/
+.coverage/
+.lcov
+
+# =============================================================================
+# Testing and Coverage
+# =============================================================================
+
+# Test output
+test-results/
+junit.xml
+coverage/
+.nyc_output/
+.coverage/
+*.lcov
+
+# Jest cache
+.jest-cache/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# =============================================================================
+# Caching and Performance
+# =============================================================================
+
+# Node.js cache
+.npm/
+.eslintcache
+.stylelintcache
+
+# TypeScript incremental compilation
+*.tsbuildinfo
+
+# Webpack cache
+.webpack/
+
+# Next.js cache
+.next/
+
+# Nuxt.js cache
+.nuxt/
+dist/
+
+# =============================================================================
+# Docker and Containerization
+# =============================================================================
+
+# Docker volumes and data
+docker-data/
+.docker/
+
+# Docker Compose override files
+docker-compose.override.yml
+docker-compose.*.yml
+!docker-compose.yml
+
+# =============================================================================
+# Database and Persistence
+# =============================================================================
+
+# SQLite databases
+*.sqlite
+*.sqlite3
+*.db
+
+# PostgreSQL
+*.pgsql
+
+# Database dumps
+*.sql
+*.dump
+
+# =============================================================================
+# Deployment and Infrastructure
+# =============================================================================
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# Kubernetes
+*.kubeconfig
+
+# Helm
+charts/*/charts/
+charts/*/requirements.lock
+
+# Cloud deployment
+.gcloud/
+.aws/
+.azure/
+
+# =============================================================================
+# Monitoring and Observability
+# =============================================================================
+
+# Grafana
+grafana_data/
+
+# Prometheus
+prometheus_data/
+
+# Jaeger
+jaeger_data/
+
+# =============================================================================
+# Security and Certificates
+# =============================================================================
+
+# SSL certificates and keys
+*.pem
+*.crt
+*.csr
+*.key
+*.p12
+*.pfx
+
+# SSH keys
+id_rsa*
+id_ed25519*
+*.pub
+
+# GPG keys
+*.gpg
+*.pgp
+
+# =============================================================================
+# Backup and Archive Files
+# =============================================================================
+
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+
+# Archive files
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.rar
+*.7z
+
+# =============================================================================
+# Application-Specific Ignores
+# =============================================================================
+
+# Veeqo MCP Server specific
+webhook-events/
+audit-logs/
+performance-data/
+
+# MCP protocol files
+mcp-logs/
+protocol-cache/
+
+# API response cache
+api-cache/
+response-cache/
+
+# Webhook payload storage
+webhook-payloads/
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+
+# Storybook
+storybook-static/
+.storybook/build/
+
+# Documentation generators
+docs/build/
+.docusaurus/
+
+# Linting and formatting
+.eslintcache
+.prettiercache
+
+# =============================================================================
+# Cloud and CI/CD
+# =============================================================================
+
+# Vercel
+.vercel/
+
+# Railway
+.railway/
+
+# Heroku
+.heroku/
+
+# GitHub Actions artifacts
+.github/workflows/artifacts/
+
+# GitLab CI
+.gitlab-ci-local/
+
+# =============================================================================
+# Performance and Profiling
+# =============================================================================
+
+# Node.js profiling
+isolate-*.log
+v8-compile-cache-*
+
+# Memory dumps
+*.heapsnapshot
+
+# Performance profiles
+*.cpuprofile
+
+# =============================================================================
+# Miscellaneous
+# =============================================================================
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# REPL history
+.node_repl_history
+
+# Lock files (uncomment to ignore specific lock files)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# =============================================================================
+# Editor and IDE specific files
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Atom
+.atom/
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# Platform-specific ignores
+# =============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Project-specific patterns
+# =============================================================================
+
+# Custom application directories
+/custom-modules/
+/local-data/
+/temp-files/
+
+# Test fixtures that shouldn't be committed
+test-fixtures/large-files/
+test-fixtures/secrets/
+
+# Generated documentation
+/docs/api/
+/docs/coverage/
+
+# Local development overrides
+local.config.js
+local.env
+dev.env
+
+# =============================================================================
+# Security patterns
+# =============================================================================
+
+# API keys and tokens (additional patterns)
+*api-key*
+*secret*
+*token*
+*password*
+credentials.json
+auth.json
+
+# Private keys
+*.pem
+*.p8
+*.p12
+*.key
+*.crt
+*.csr
+
+# =============================================================================
+# Performance and optimization
+# =============================================================================
+
+# Webpack bundle analysis
+bundle-analysis.html
+webpack-bundle-analyzer-report.html
+
+# Source maps in production
+*.map
+
+# =============================================================================
+# Custom ignore patterns for this project
+# =============================================================================
+
+# Veeqo-specific files
+veeqo-*.local
+veeqo-test-data/
+veeqo-exports/
+
+# MCP server specific
+mcp-server-*.log
+protocol-debug/
+
+# Webhook development
+webhook-test-payloads/
+webhook-signatures/
+
+# Performance testing
+load-test-results/
+benchmark-data/
+
+# =============================================================================
+# Keep certain files (using ! to negate ignore)
+# =============================================================================
+
+# Keep essential config files
+!.gitignore
+!.npmignore
+!.dockerignore
+!.github/
+!docker-compose.yml
+!Dockerfile
+
+# Keep example files
+!*.example
+!*.sample
+!*.template
+
+# Keep documentation
+!README.md
+!CONTRIBUTING.md
+!LICENSE
+!CHANGELOG.md
+
+# =============================================================================
+# Comments and notes
+# =============================================================================
+
+# This .gitignore file is comprehensive and covers:
+# 1. All Node.js and TypeScript development artifacts
+# 2. Common editor and IDE files
+# 3. Platform-specific system files
+# 4. Build and deployment artifacts
+# 5. Security-sensitive files
+# 6. Performance and monitoring data
+# 7. Docker and containerization files
+# 8. Database and cache files
+# 9. CI/CD and cloud deployment artifacts
+# 10. Application-specific patterns for Veeqo MCP Server
+
+# Customize this file by:
+# - Uncommenting relevant lock file ignores based on your package manager choice
+# - Adding project-specific patterns as needed
+# - Modifying IDE-specific sections based on your development environment
+# - Adjusting deployment-specific ignores based on your infrastructure
+
+# Remember to:
+# - Keep .env.example for documentation
+# - Don't ignore essential config files
+# - Be careful with wildcard patterns
+# - Test ignore patterns with 'git status' before committing
