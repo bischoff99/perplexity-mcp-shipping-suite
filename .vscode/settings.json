@@ -19,5 +19,6 @@
   "typescript.suggest.autoImports": true,
   "editor.inlineSuggest.enabled": true,
   "editor.inlineSuggest.showToolbar": "always",
-  "workbench.editor.enablePreview": false
+  "workbench.editor.enablePreview": false,
+  "nxConsole.generateAiAgentRules": true
 }
