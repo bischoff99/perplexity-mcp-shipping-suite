@@ -95,6 +95,12 @@ temp/
 
 # Editor directories and files
 .vscode/
+# But allow specific shared configuration files
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/snippets.code-snippets
+!.vscode/perplexity-mcp.code-workspace
 .idea/
 *.swp
 *.swo
