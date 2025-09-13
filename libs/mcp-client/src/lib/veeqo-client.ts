@@ -1,9 +1,9 @@
-import { MCPClient, MCPClientConfig } from './base-client';
+import { MCPClient, MCPClientConfig } from './base-client.js';
 import type {
   VeeqoOrder,
   VeeqoProduct,
   VeeqoSellable
-} from '../../../shared/src/index.js';
+} from '@perplexity/shared';
 
 export interface VeeqoMCPConfig extends Omit<MCPClientConfig, 'baseURL'> {
   baseURL?: string;

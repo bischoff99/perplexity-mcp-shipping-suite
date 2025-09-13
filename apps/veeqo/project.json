@@ -1,0 +1,79 @@
+{
+    "name": "veeqo",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/veeqo/src",
+    "projectType": "application",
+    "tags": [
+        "type:app",
+        "scope:veeqo"
+    ],
+    "targets": {
+        "build": {
+            "executor": "@nx/js:tsc",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/apps/veeqo",
+                "main": "apps/veeqo/src/index.ts",
+                "tsConfig": "apps/veeqo/tsconfig.json",
+                "assets": []
+            }
+        },
+        "serve": {
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                "build"
+            ],
+            "options": {
+                "buildTarget": "veeqo:build",
+                "inspect": false
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "veeqo:build"
+                },
+                "production": {
+                    "buildTarget": "veeqo:build:production"
+                }
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "options": {
+                "lintFilePatterns": [
+                    "apps/veeqo/**/*.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+            ],
+            "options": {
+                "jestConfig": "apps/veeqo/jest.config.cjs",
+                "passWithNoTests": true
+            },
+            "configurations": {
+                "ci": {
+                    "ci": true,
+                    "coverageReporters": [
+                        "text"
+                    ]
+                }
+            }
+        },
+        "typecheck": {
+            "executor": "@nx/js:tsc",
+            "options": {
+                "tsConfig": "apps/veeqo/tsconfig.json",
+                "noEmit": true
+            }
+        }
+    }
+}

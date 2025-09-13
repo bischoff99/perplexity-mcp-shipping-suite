@@ -1,3 +1,3 @@
-export * from './lib/base-client';
-export * from './lib/easypost-client';
-export * from './lib/veeqo-client';
+export * from './lib/base-client.js';
+export * from './lib/easypost-client.js';
+export * from './lib/veeqo-client.js';

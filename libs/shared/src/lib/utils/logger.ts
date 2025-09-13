@@ -19,7 +19,8 @@ export function createLogger(config: LoggerConfig = {}) {
       winston.format.timestamp(),
       winston.format.errors({ stack: true }),
       winston.format.json(),
-      winston.format.printf(({ timestamp, level, message, service, ...meta }) => {
+      winston.format.printf((info: winston.Logform.TransformableInfo) => {
+        const { timestamp, level, message, service, ...meta } = info;
         const logEntry = {
           timestamp,
           level,
@@ -36,9 +37,9 @@ export function createLogger(config: LoggerConfig = {}) {
       new winston.transports.Console({
         format: environment === 'development'
           ? winston.format.combine(
-              winston.format.colorize(),
-              winston.format.simple()
-            )
+            winston.format.colorize(),
+            winston.format.simple()
+          )
           : winston.format.json()
       })
     ]

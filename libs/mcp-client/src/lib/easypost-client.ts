@@ -1,10 +1,10 @@
-import { MCPClient, MCPClientConfig } from './base-client';
+import { MCPClient, MCPClientConfig } from './base-client.js';
 import type {
   EasyPostAddress,
   EasyPostParcel,
   EasyPostShipment,
   EasyPostRate
-} from '../../../shared/src/index.js';
+} from '@perplexity/shared';
 
 export interface EasyPostMCPConfig extends Omit<MCPClientConfig, 'baseURL'> {
   baseURL?: string;

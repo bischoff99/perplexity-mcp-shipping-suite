@@ -1,0 +1,50 @@
+{
+    "name": "ui-components",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/ui-components/src",
+    "projectType": "library",
+    "tags": [
+        "type:lib",
+        "scope:ui-components"
+    ],
+    "targets": {
+        "build": {
+            "executor": "@nx/vite:build",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/libs/ui-components"
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "options": {
+                "lintFilePatterns": [
+                    "libs/ui-components/**/*.{ts,tsx,js,jsx}"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nx/vite:test",
+            "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+            ],
+            "options": {
+                "passWithNoTests": true,
+                "reportsDirectory": "../../coverage/libs/ui-components"
+            }
+        },
+        "typecheck": {
+            "executor": "@nx/vite:test",
+            "options": {
+                "config": "libs/ui-components/vite.config.ts",
+                "run": false,
+                "typecheck": true
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { HttpClient, createHttpClient } from '../../../shared/src/index.js';
-import type { MCPRequest, MCPResponse } from '../../../shared/src/index.js';
+import { HttpClient, createHttpClient } from '@perplexity/shared';
+import type { MCPRequest, MCPResponse } from '@perplexity/shared';
 
 export interface MCPClientConfig {
   baseURL: string;

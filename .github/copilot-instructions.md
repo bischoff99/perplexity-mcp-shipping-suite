@@ -2,45 +2,104 @@
 
 ## Project Overview
 
-This is a **Model Context Protocol (MCP) Shipping Automation Suite** built with TypeScript/Node.js. The project implements MCP servers for shipping and inventory management with EasyPost and Veeqo API integrations.
+This is a **Model Context Protocol (MCP) Shipping Automation Suite** built with TypeScript/Node.js using **Nx monorepo**. The project implements MCP servers for shipping and inventory management with EasyPost and Veeqo API integrations.
 
 ### Architecture
-- **Monorepo structure** with Nx workspace management
-- **Three main components**:
-  - EasyPost MCP Server (port 3000) - Shipping automation
-  - Veeqo MCP Server (port 3002) - Inventory management  
-  - Web Dashboard (port 3003) - Frontend interface
-- **Shared libraries** for common utilities and MCP client
+- **Nx monorepo** with `apps/*` and `libs/*` structure
+- **Three main applications**:
+  - `apps/easypost/` - EasyPost MCP Server (port 3000) - Shipping automation
+  - `apps/veeqo/` - Veeqo MCP Server (port 3002) - Inventory management  
+  - `apps/web-dashboard/` - Next.js dashboard (port 3003) - Frontend interface
+  - `apps/web-dashboard-e2e/` - E2E tests for dashboard
+- **Shared libraries** in `libs/`:
+  - `libs/shared/` - Common utilities, logger, validation
+  - `libs/mcp-client/` - MCP protocol client implementation  
+  - `libs/ui-components/` - Shared React components
 - **Docker-based deployment** with Redis and PostgreSQL
+
+### Critical Build Dependencies
+- Libraries must be built BEFORE apps: `pnpm run build:libs` then `pnpm run build:apps`
+- Use `nx affected` commands to rebuild only changed projects
+- Run `pnpm run quick-start` for full setup from scratch
 
 ## Development Context
 
 ### Core Technologies
 - **TypeScript** with strict mode and ES2022 target
-- **Model Context Protocol (MCP)** JSON-RPC 2.0 implementation
+- **Nx 21.5.2** for monorepo management - use `nx` commands for all operations
+- **Model Context Protocol (MCP)** JSON-RPC 2.0 implementation with `@modelcontextprotocol/sdk`
 - **Express.js** for HTTP servers and health checks
+- **Next.js** for web dashboard with React and Tailwind CSS
 - **Zod** for runtime validation and type safety
 - **Winston** for structured JSON logging
 - **Jest** for testing with 70% coverage requirement
 - **Docker** for containerization and deployment
+- **pnpm** for package management (NOT npm despite package.json comments)
+
+### Essential Nx Commands
+```bash
+# Development (start all services in parallel)
+pnpm run dev                 # All services 
+nx serve easypost           # Individual app
+nx serve web-dashboard      # Next.js dashboard
+
+# Building (respect dependency order)
+nx run-many -t build --projects=shared,mcp-client,ui-components  # Libs first
+nx run-many -t build --projects=easypost,veeqo,web-dashboard     # Then apps
+pnpm run build:libs && pnpm run build:apps                       # Or use scripts
+
+# Testing and linting
+nx run-many -t test         # All tests
+nx affected -t test         # Only affected projects
+nx run-many -t lint --fix   # Fix linting issues
+```
 
 ### Key Patterns
 
-#### MCP Server Structure
+#### MCP Server Structure (apps/easypost/src/server.ts, apps/veeqo/src/server.ts)
 ```typescript
 export class MCPServer {
+  private server: Server;
+  private httpServer?: HttpServer;
+  private app?: Express;
+  
+  constructor(config: MCPServerConfig) {
+    this.server = new Server({
+      name: 'shipping-server',
+      version: '1.0.0'
+    }, {
+      capabilities: {
+        tools: {},
+        resources: {}
+      }
+    });
+  }
+
   private setupMCPHandlers(): void {
     // Register MCP tools with proper validation
-    // Use Zod schemas for input validation
-    // Return structured responses with error handling
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+      return await this.handlers.callTool(name, args);
+    });
   }
   
   private setupHttpServer(): void {
     // Health checks, metrics, webhook endpoints
-    // Rate limiting and security middleware
-    // CORS configuration for web integration
+    this.app = express();
+    this.app.use(helmet(), cors());
+    this.app.get('/health', this.healthCheck.bind(this));
   }
 }
+```
+
+#### Shared Library Usage (libs/shared/src/lib/)
+```typescript
+import { logger } from '@perplexity/shared';
+import { validateShipmentRequest } from '@perplexity/shared';
+import { HttpClient } from '@perplexity/shared';
+
+// All apps import from shared libs using workspace aliases
+// Never duplicate utilities across apps
 ```
 
 #### API Integration Pattern
@@ -226,15 +285,16 @@ const config = {
 - Never log sensitive information
 - Use health check endpoints for monitoring
 
-## Working with Dependencies
+### Working with Dependencies
 
 ### Package Management
-- Use **npm** for dependency management (not pnpm due to Nx compatibility)
+- Use **pnpm** for dependency management (NOT npm despite package.json comments)
 - Keep dependencies updated and secure
 - Use exact versions for production dependencies
 - Group dev dependencies appropriately
 
 ### Key Dependencies
+- `@modelcontextprotocol/sdk` - Core MCP implementation
 - `@types/node` - Node.js type definitions
 - `express` - HTTP server framework
 - `zod` - Runtime validation

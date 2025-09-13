@@ -1,0 +1,79 @@
+{
+    "name": "easypost",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/easypost/src",
+    "projectType": "application",
+    "tags": [
+        "type:app",
+        "scope:easypost"
+    ],
+    "targets": {
+        "build": {
+            "executor": "@nx/js:tsc",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/apps/easypost",
+                "main": "apps/easypost/src/index.ts",
+                "tsConfig": "apps/easypost/tsconfig.json",
+                "assets": []
+            }
+        },
+        "serve": {
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                "build"
+            ],
+            "options": {
+                "buildTarget": "easypost:build",
+                "inspect": false
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "easypost:build"
+                },
+                "production": {
+                    "buildTarget": "easypost:build:production"
+                }
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "options": {
+                "lintFilePatterns": [
+                    "apps/easypost/**/*.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+            ],
+            "options": {
+                "jestConfig": "apps/easypost/jest.config.cjs",
+                "passWithNoTests": true
+            },
+            "configurations": {
+                "ci": {
+                    "ci": true,
+                    "coverageReporters": [
+                        "text"
+                    ]
+                }
+            }
+        },
+        "typecheck": {
+            "executor": "@nx/js:tsc",
+            "options": {
+                "tsConfig": "apps/easypost/tsconfig.json",
+                "noEmit": true
+            }
+        }
+    }
+}

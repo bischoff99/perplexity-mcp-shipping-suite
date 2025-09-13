@@ -5,7 +5,9 @@
     "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["es2022"],
+    "lib": [
+      "es2022"
+    ],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "noEmitOnError": true,
@@ -16,6 +18,20 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["perplexity-mcp-shipping-suite"]
+    "customConditions": [
+      "perplexity-mcp-shipping-suite"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@perplexity/shared": [
+        "libs/shared/src/index.ts"
+      ],
+      "@perplexity/mcp-client": [
+        "libs/mcp-client/src/index.ts"
+      ],
+      "@perplexity/ui-components": [
+        "libs/ui-components/src/index.ts"
+      ]
+    }
   }
 }
