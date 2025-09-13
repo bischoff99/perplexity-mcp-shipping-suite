@@ -149,7 +149,7 @@ export class EasyPostMCPServer {
             return await this.handleBuyInsurance(args);
 
           case 'create_batch':
-            return await this.handleCreateBatch(args);
+            return await this.handleCreateBatch();
 
           case 'add_shipments_to_batch':
             return await this.handleAddShipmentsToBatch(args);
@@ -609,7 +609,7 @@ export class EasyPostMCPServer {
     };
   }
 
-  private async handleCreateBatch(_args: unknown) {
+  private async handleCreateBatch() {
     const result = await this.handlers.createBatch();
 
     return {
