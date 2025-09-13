@@ -331,13 +331,13 @@ const logger = createLogger();
  * Enhanced logger with custom methods for Veeqo operations
  */
 interface VeeqoLogger extends Logger {
-  performance(operation: string, duration: number, context?: LoggerContext): void;
-  veeqoApi(method: string, url: string, status: number, duration: number, context?: LoggerContext): void;
-  orderEvent(event: string, orderId: number, context?: LoggerContext): void;
-  productEvent(event: string, productId: number, context?: LoggerContext): void;
-  inventoryEvent(event: string, sellableId: number, warehouseId: number, context?: LoggerContext): void;
-  webhookEvent(event: string, resourceType: string, resourceId: number, context?: LoggerContext): void;
-  security(event: string, details: Record<string, unknown>): void;
+  performance(_operation: string, _duration: number, _context?: LoggerContext): void;
+  veeqoApi(_method: string, _url: string, _status: number, _duration: number, _context?: LoggerContext): void;
+  orderEvent(_event: string, _orderId: number, _context?: LoggerContext): void;
+  productEvent(_event: string, _productId: number, _context?: LoggerContext): void;
+  inventoryEvent(_event: string, _sellableId: number, _warehouseId: number, _context?: LoggerContext): void;
+  webhookEvent(_event: string, _resourceType: string, _resourceId: number, _context?: LoggerContext): void;
+  security(_event: string, _details: Record<string, unknown>): void;
 }
 
 /**

@@ -609,7 +609,7 @@ export class EasyPostMCPServer {
     };
   }
 
-  private async handleCreateBatch(_args: unknown) {
+  private async handleCreateBatch() {
     const result = await this.handlers.createBatch();
 
     return {

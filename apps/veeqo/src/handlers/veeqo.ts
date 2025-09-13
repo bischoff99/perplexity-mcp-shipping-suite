@@ -1064,7 +1064,7 @@ export class VeeqoHandlers {
     };
   }
 
-  async getInventoryReport(_filters: any): Promise<any> {
+  async getInventoryReport(): Promise<any> {
     return {
       total_items: 1500,
       low_stock_items: 45,
@@ -1077,7 +1077,7 @@ export class VeeqoHandlers {
     };
   }
 
-  async getOrderAnalytics(_filters: any): Promise<any> {
+  async getOrderAnalytics(): Promise<any> {
     return {
       total_orders: 2500,
       order_growth: 12.3,

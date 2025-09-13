@@ -193,7 +193,7 @@ export class WebhookManager {
           try {
             const event = JSON.parse(eventData) as VeeqoWebhookEvent;
             events.push(event);
-          } catch (parseError) {
+          } catch {
             logger.warn('Failed to parse stored webhook event', { key });
           }
         }
