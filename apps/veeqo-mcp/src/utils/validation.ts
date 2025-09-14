@@ -25,10 +25,13 @@ import { logger } from './logger.js';
  * Provides comprehensive input validation using Zod schemas with Veeqo-specific business rules
  */
 
+// Zod v4 compatible type for SafeParseResult
+type SafeParseResult<T> = z.ZodSafeParseSuccess<T> | z.ZodSafeParseError<T>;
+
 /**
  * Validate environment variables
  */
-export function validateEnvironmentVariables(): z.SafeParseReturnType<Record<string, unknown>, EnvironmentVariables> {
+export function validateEnvironmentVariables(): SafeParseResult<EnvironmentVariables> {
   const envVars = {
     NODE_ENV: process.env['NODE_ENV'],
     VEEQO_API_KEY: process.env['VEEQO_API_KEY'],
@@ -48,7 +51,7 @@ export function validateEnvironmentVariables(): z.SafeParseReturnType<Record<str
   
   if (!result.success) {
     logger.error('Environment variable validation failed', {
-      errors: result.error.errors
+      errors: result.error.issues
     });
   } else {
     // Additional validation for Veeqo-specific requirements
@@ -56,12 +59,12 @@ export function validateEnvironmentVariables(): z.SafeParseReturnType<Record<str
       logger.error('Invalid Veeqo API key format');
       return {
         success: false,
-        error: z.ZodError.create([{
+        error: new z.ZodError([{
           code: 'custom',
           path: ['VEEQO_API_KEY'],
           message: 'Invalid Veeqo API key format'
         }])
-      } as z.SafeParseReturnType<Record<string, unknown>, EnvironmentVariables>;
+      } as SafeParseResult<EnvironmentVariables>;
     }
   }
 
@@ -71,12 +74,12 @@ export function validateEnvironmentVariables(): z.SafeParseReturnType<Record<str
 /**
  * Validate order creation request
  */
-export function validateOrderCreation(data: unknown): z.SafeParseReturnType<unknown, CreateOrderRequest> {
+export function validateOrderCreation(data: unknown): SafeParseResult<CreateOrderRequest> {
   const result = CreateOrderSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Order creation validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
     return result;
@@ -92,12 +95,12 @@ export function validateOrderCreation(data: unknown): z.SafeParseReturnType<unkn
     
     return {
       success: false,
-      error: z.ZodError.create(businessValidation.errors.map(err => ({
+      error: new z.ZodError(businessValidation.errors.map(err => ({
         code: 'custom',
         path: [],
         message: err
       })))
-    } as z.SafeParseReturnType<unknown, CreateOrderRequest>;
+    } as SafeParseResult<CreateOrderRequest>;
   }
 
   return result;
@@ -106,12 +109,12 @@ export function validateOrderCreation(data: unknown): z.SafeParseReturnType<unkn
 /**
  * Validate product creation request
  */
-export function validateProductCreation(data: unknown): z.SafeParseReturnType<unknown, CreateProductRequest> {
+export function validateProductCreation(data: unknown): SafeParseResult<CreateProductRequest> {
   const result = CreateProductSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Product creation validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
     return result;
@@ -127,12 +130,12 @@ export function validateProductCreation(data: unknown): z.SafeParseReturnType<un
     
     return {
       success: false,
-      error: z.ZodError.create(businessValidation.errors.map(err => ({
+      error: new z.ZodError(businessValidation.errors.map(err => ({
         code: 'custom',
         path: [],
         message: err
       })))
-    } as z.SafeParseReturnType<unknown, CreateProductRequest>;
+    } as SafeParseResult<CreateProductRequest>;
   }
 
   return result;
@@ -141,12 +144,12 @@ export function validateProductCreation(data: unknown): z.SafeParseReturnType<un
 /**
  * Validate product update request
  */
-export function validateProductUpdate(data: unknown): z.SafeParseReturnType<unknown, UpdateProductRequest & { productId: number }> {
+export function validateProductUpdate(data: unknown): SafeParseResult<UpdateProductRequest & { productId: number }> {
   const result = UpdateProductSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Product update validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -157,12 +160,12 @@ export function validateProductUpdate(data: unknown): z.SafeParseReturnType<unkn
 /**
  * Validate customer creation request
  */
-export function validateCustomerCreation(data: unknown): z.SafeParseReturnType<unknown, CreateCustomerRequest> {
+export function validateCustomerCreation(data: unknown): SafeParseResult<CreateCustomerRequest> {
   const result = CreateCustomerSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Customer creation validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
     return result;
@@ -178,12 +181,12 @@ export function validateCustomerCreation(data: unknown): z.SafeParseReturnType<u
     
     return {
       success: false,
-      error: z.ZodError.create(businessValidation.errors.map(err => ({
+      error: new z.ZodError(businessValidation.errors.map(err => ({
         code: 'custom',
         path: [],
         message: err
       })))
-    } as z.SafeParseReturnType<unknown, CreateCustomerRequest>;
+    } as SafeParseResult<CreateCustomerRequest>;
   }
 
   return result;
@@ -192,12 +195,12 @@ export function validateCustomerCreation(data: unknown): z.SafeParseReturnType<u
 /**
  * Validate inventory update request
  */
-export function validateInventoryUpdate(data: unknown): z.SafeParseReturnType<unknown, UpdateInventoryRequest> {
+export function validateInventoryUpdate(data: unknown): SafeParseResult<UpdateInventoryRequest> {
   const result = UpdateInventorySchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Inventory update validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
     return result;
@@ -213,12 +216,12 @@ export function validateInventoryUpdate(data: unknown): z.SafeParseReturnType<un
     
     return {
       success: false,
-      error: z.ZodError.create(businessValidation.errors.map(err => ({
+      error: new z.ZodError(businessValidation.errors.map(err => ({
         code: 'custom',
         path: [],
         message: err
       })))
-    } as z.SafeParseReturnType<unknown, UpdateInventoryRequest>;
+    } as SafeParseResult<UpdateInventoryRequest>;
   }
 
   return result;
@@ -227,12 +230,12 @@ export function validateInventoryUpdate(data: unknown): z.SafeParseReturnType<un
 /**
  * Validate order search parameters
  */
-export function validateOrderSearch(data: unknown): z.SafeParseReturnType<unknown, OrderSearchParams> {
-  const result = OrderSearchSchema.safeParse(data) as z.SafeParseReturnType<unknown, OrderSearchParams>;
+export function validateOrderSearch(data: unknown): SafeParseResult<OrderSearchParams> {
+  const result = OrderSearchSchema.safeParse(data) as SafeParseResult<OrderSearchParams>;
   
   if (!result.success) {
     logger.warn('Order search validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -243,12 +246,12 @@ export function validateOrderSearch(data: unknown): z.SafeParseReturnType<unknow
 /**
  * Validate product search parameters
  */
-export function validateProductSearch(data: unknown): z.SafeParseReturnType<unknown, ProductSearchParams> {
-  const result = ProductSearchSchema.safeParse(data) as z.SafeParseReturnType<unknown, ProductSearchParams>;
+export function validateProductSearch(data: unknown): SafeParseResult<ProductSearchParams> {
+  const result = ProductSearchSchema.safeParse(data) as SafeParseResult<ProductSearchParams>;
   
   if (!result.success) {
     logger.warn('Product search validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -259,12 +262,12 @@ export function validateProductSearch(data: unknown): z.SafeParseReturnType<unkn
 /**
  * Validate warehouse operation
  */
-export function validateWarehouseOperation(data: unknown): z.SafeParseReturnType<unknown, { warehouse_id?: number; operation?: string }> {
-  const result = WarehouseOperationSchema.safeParse(data) as z.SafeParseReturnType<unknown, { warehouse_id?: number; operation?: string }>;
+export function validateWarehouseOperation(data: unknown): SafeParseResult<{ warehouse_id?: number; operation?: string }> {
+  const result = WarehouseOperationSchema.safeParse(data) as SafeParseResult<{ warehouse_id?: number; operation?: string }>;
   
   if (!result.success) {
     logger.warn('Warehouse operation validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -748,7 +751,7 @@ export function validateRequestComprehensive<T>(
     return { isValid: true, data: result.data };
   }
 
-  const errors = result.error.errors.map(err => 
+  const errors = result.error.issues.map(err => 
     `${err.path.join('.')}: ${err.message}`
   );
 

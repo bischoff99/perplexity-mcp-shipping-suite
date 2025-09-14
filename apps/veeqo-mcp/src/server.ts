@@ -641,7 +641,7 @@ export class VeeqoMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid order creation parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -667,7 +667,7 @@ export class VeeqoMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid order search parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -745,7 +745,7 @@ export class VeeqoMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid product creation parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -771,7 +771,7 @@ export class VeeqoMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid product search parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -822,7 +822,7 @@ export class VeeqoMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid product update parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -867,7 +867,7 @@ export class VeeqoMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid inventory update parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -911,7 +911,7 @@ export class VeeqoMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid customer creation parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -1096,9 +1096,8 @@ export class VeeqoMCPServer {
     };
   }
 
-  private async handleGetInventoryReport(args: unknown) {
-    const filters = args as any || {};
-    const result = await this.handlers.getInventoryReport(filters);
+  private async handleGetInventoryReport(_args: unknown) {
+    const result = await this.handlers.getInventoryReport();
 
     return {
       content: [
@@ -1114,9 +1113,8 @@ export class VeeqoMCPServer {
     };
   }
 
-  private async handleGetOrderAnalytics(args: unknown) {
-    const filters = args as any || {};
-    const result = await this.handlers.getOrderAnalytics(filters);
+  private async handleGetOrderAnalytics(_args: unknown) {
+    const result = await this.handlers.getOrderAnalytics();
 
     return {
       content: [

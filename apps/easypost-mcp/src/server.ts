@@ -408,7 +408,7 @@ export class EasyPostMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid shipment creation parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -434,7 +434,7 @@ export class EasyPostMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid shipment rates parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -460,7 +460,7 @@ export class EasyPostMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid label purchase parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -497,7 +497,7 @@ export class EasyPostMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid tracking parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -526,7 +526,7 @@ export class EasyPostMCPServer {
       throw new McpError(
         ErrorCode.InvalidParams,
         'Invalid address validation parameters',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
