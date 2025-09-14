@@ -20,7 +20,11 @@
       "inputs": ["production", "^production"]
     },
     "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/config/jest/jest.preset.js"]
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/config/jest/jest.preset.js"
+      ]
     },
     "lint": {
       "inputs": [
@@ -29,5 +33,6 @@
         "{workspaceRoot}/config/eslint/.eslintignore"
       ]
     }
-  }
+  },
+  "nxCloudId": "68c6210470209b5e488ead40"
 }
