@@ -1,8 +1,8 @@
-name: 'CI/CD Pipeline'
+name: 'CI/CD Pipeline with AI Integration'
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, chore/cursor-workspace]
   pull_request:
     branches: [main]
   release:
@@ -77,6 +77,228 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
+
+  # Optional Claude API integration job
+  optional-claude-api:
+    name: 'Claude API Analysis'
+    runs-on: ubuntu-latest
+    if: ${{ secrets.CLAUDE_API_KEY && secrets.USE_CLAUDE == 'true' }}
+    needs: [test]
+    env:
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate project summary
+        run: node scripts/generate-summary.js
+
+      - name: Call Claude API for analysis
+        run: |
+          echo "Calling Claude API for project analysis..."
+          
+          # Read the generated prompt
+          PROMPT_CONTENT=$(cat ARTIFACTS/CLAUDE_PROMPT_FOR_SUMMARY.txt)
+          SUMMARY_CONTENT=$(cat SUMMARY.md)
+          
+          # Combine prompt with current summary
+          COMBINED_INPUT="$PROMPT_CONTENT
+
+          ## Current Project Summary
+          $SUMMARY_CONTENT"
+          
+          # Call Claude API (placeholder endpoint - replace with actual Anthropic API)
+          curl -sS -X POST "https://api.anthropic.com/v1/messages" \
+            -H "Authorization: Bearer ${CLAUDE_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "anthropic-version: 2023-06-01" \
+            -d "{
+              \"model\": \"claude-3-5-sonnet-20241022\",
+              \"max_tokens\": 4000,
+              \"messages\": [{
+                \"role\": \"user\",
+                \"content\": \"${COMBINED_INPUT//\"/\\\"}\"
+              }]
+            }" > SUMMARY_CLAUDE.md || echo "Claude API call failed, continuing..."
+
+      - name: Upload Claude analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-analysis
+          path: |
+            SUMMARY_CLAUDE.md
+            SUMMARY.md
+            ARTIFACTS/CLAUDE_PROMPT_FOR_SUMMARY.txt
+          retention-days: 30
+
+  # Generate Claude prompt for manual web UI usage
+  prepare-claude-prompt:
+    name: 'Prepare Claude Prompt'
+    runs-on: ubuntu-latest
+    if: ${{ secrets.GENERATE_CLAUDE_PROMPT == 'true' }}
+    needs: [test]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate Claude prompt for manual use
+        run: |
+          echo "Generating Claude prompt for manual web UI usage..."
+          node scripts/generate-summary.js
+          
+          # Add instructions for manual usage
+          cat >> ARTIFACTS/CLAUDE_PROMPT_FOR_SUMMARY.txt << 'EOF'
+
+          ## Instructions for Manual Claude Web UI Usage
+
+          1. Copy the entire prompt above
+          2. Go to https://claude.ai
+          3. Start a new conversation
+          4. Paste the prompt and submit
+          5. Claude will provide a comprehensive analysis
+          6. Copy the response and save as SUMMARY_CLAUDE.md in the repository
+
+          ## Expected Output
+          Claude should provide:
+          - Architecture review and recommendations
+          - Code quality assessment
+          - Security analysis
+          - Performance optimization suggestions
+          - Development experience improvements
+          - Testing strategy recommendations
+          - Documentation enhancement suggestions
+          EOF
+
+      - name: Upload Claude prompt for manual use
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-prompt-manual
+          path: ARTIFACTS/CLAUDE_PROMPT_FOR_SUMMARY.txt
+          retention-days: 7
+
+      - name: Comment on PR with Claude instructions
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const prompt = fs.readFileSync('ARTIFACTS/CLAUDE_PROMPT_FOR_SUMMARY.txt', 'utf8');
+            
+            const comment = `## 🤖 Claude Analysis Available
+            
+            A Claude prompt has been generated for manual analysis. To use:
+            
+            1. Download the artifact: \`claude-prompt-manual\`
+            2. Copy the prompt content
+            3. Go to [claude.ai](https://claude.ai) and paste the prompt
+            4. Save the response as \`SUMMARY_CLAUDE.md\` in this PR
+            
+            **Prompt Preview:**
+            \`\`\`
+            ${prompt.substring(0, 500)}...
+            \`\`\`
+            
+            [Download Full Prompt](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Optional Hugging Face deployment job
+  hf-deploy:
+    name: 'Hugging Face Deployment'
+    runs-on: ubuntu-latest
+    if: ${{ secrets.HF_API_TOKEN && secrets.USE_HF == 'true' }}
+    needs: [test, security]
+    env:
+      HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+      USE_HF: 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Hugging Face CLI
+        run: |
+          pip install huggingface_hub
+          pip install gradio
+
+      - name: Authenticate with Hugging Face
+        run: |
+          echo "Authenticating with Hugging Face..."
+          huggingface-cli login --token $HF_API_TOKEN
+
+      - name: Setup pnpm  
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: |
+          pnpm run build:libs
+          pnpm run build:apps
+
+      - name: Deploy to Hugging Face
+        run: |
+          echo "Deploying to Hugging Face..."
+          chmod +x scripts/hf_deploy.sh
+          ./scripts/hf_deploy.sh --all
+
+      - name: Upload deployment logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: huggingface-deployment-logs
+          path: |
+            ARTIFACTS/
+          retention-days: 30
 
   build:
     name: 'Build & Push Images'
