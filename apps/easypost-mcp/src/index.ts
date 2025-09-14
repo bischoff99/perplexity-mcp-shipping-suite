@@ -51,7 +51,7 @@ async function main(): Promise<void> {
     const envValidation = validateEnvironmentVariables();
     if (!envValidation.success) {
       logger.error('Environment validation failed:', {
-        errors: envValidation.error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        errors: envValidation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`)
       });
       process.exit(1);
     }

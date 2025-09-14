@@ -110,7 +110,7 @@ export const EasyPostAddressSchema = z.object({
         field: z.string(),
         message: z.string()
       })).optional(),
-      details: z.record(z.unknown()).optional()
+      details: z.record(z.string(), z.unknown()).optional()
     }).optional(),
     delivery: z.object({
       success: z.boolean(),
@@ -119,7 +119,7 @@ export const EasyPostAddressSchema = z.object({
         field: z.string(),
         message: z.string()
       })).optional(),
-      details: z.record(z.unknown()).optional()
+      details: z.record(z.string(), z.unknown()).optional()
     }).optional()
   }).optional()
 });
@@ -241,7 +241,7 @@ export const EasyPostShipmentSchema = z.object({
   selected_rate: EasyPostRateSchema.optional(),
   rates: z.array(EasyPostRateSchema).optional(),
   postage_label: EasyPostPostageLabelSchema.optional(),
-  forms: z.array(z.record(z.unknown())).optional(),
+  forms: z.array(z.record(z.string(), z.unknown())).optional(),
   fees: z.array(z.object({
     object: z.string(),
     type: z.string(),
@@ -250,7 +250,7 @@ export const EasyPostShipmentSchema = z.object({
     refunded: z.boolean()
   })).optional(),
   insurance: z.string().optional(),
-  options: z.record(z.unknown()).optional(),
+  options: z.record(z.string(), z.unknown()).optional(),
   messages: z.array(z.object({
     carrier: z.string(),
     carrier_account_id: z.string(),
@@ -361,7 +361,7 @@ export const EasyPostCarrierSchema = z.object({
   type: z.string(),
   readable: z.string(),
   logo: z.string().url().optional(),
-  fields: z.record(z.object({
+  fields: z.record(z.string(), z.object({
     visibility: z.string(),
     label: z.string(),
     value: z.string().optional()
@@ -380,7 +380,7 @@ export const CreateShipmentRequestSchema = z.object({
   from_address: EasyPostAddressSchema.omit({ id: true, object: true, created_at: true, updated_at: true, verifications: true }),
   return_address: EasyPostAddressSchema.omit({ id: true, object: true, created_at: true, updated_at: true, verifications: true }).optional(),
   parcel: EasyPostParcelSchema.omit({ id: true, object: true, created_at: true, updated_at: true }),
-  options: z.record(z.unknown()).optional(),
+  options: z.record(z.string(), z.unknown()).optional(),
   customs_info: z.object({
     contents_type: z.string(),
     contents_explanation: z.string().optional(),

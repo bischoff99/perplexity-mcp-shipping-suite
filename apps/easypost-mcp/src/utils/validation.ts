@@ -22,10 +22,13 @@ import { logger } from './logger.js';
  * Provides comprehensive input validation using Zod schemas
  */
 
+// Zod v4 compatible type for SafeParseResult
+type SafeParseResult<T> = z.ZodSafeParseSuccess<T> | z.ZodSafeParseError<T>;
+
 /**
  * Validate environment variables
  */
-export function validateEnvironmentVariables(): z.SafeParseReturnType<Record<string, unknown>, EnvironmentVariables> {
+export function validateEnvironmentVariables(): SafeParseResult<EnvironmentVariables> {
   const envVars = {
     NODE_ENV: process.env['NODE_ENV'],
     EASYPOST_API_KEY: process.env['EASYPOST_API_KEY'],
@@ -40,7 +43,7 @@ export function validateEnvironmentVariables(): z.SafeParseReturnType<Record<str
   
   if (!result.success) {
     logger.error('Environment variable validation failed', {
-      errors: result.error.errors
+      errors: result.error.issues
     });
   }
 
@@ -50,12 +53,12 @@ export function validateEnvironmentVariables(): z.SafeParseReturnType<Record<str
 /**
  * Validate shipment creation request
  */
-export function validateShipmentCreation(data: unknown): z.SafeParseReturnType<unknown, CreateShipmentRequest> {
+export function validateShipmentCreation(data: unknown): SafeParseResult<CreateShipmentRequest> {
   const result = CreateShipmentRequestSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Shipment creation validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -66,12 +69,12 @@ export function validateShipmentCreation(data: unknown): z.SafeParseReturnType<u
 /**
  * Validate address verification request
  */
-export function validateAddressVerification(data: unknown): z.SafeParseReturnType<unknown, AddressValidationRequest> {
+export function validateAddressVerification(data: unknown): SafeParseResult<AddressValidationRequest> {
   const result = AddressValidationRequestSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Address validation request validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -82,12 +85,12 @@ export function validateAddressVerification(data: unknown): z.SafeParseReturnTyp
 /**
  * Validate shipment rates fetch request
  */
-export function validateShipmentRatesFetch(data: unknown): z.SafeParseReturnType<unknown, ShipmentRatesFetchRequest> {
+export function validateShipmentRatesFetch(data: unknown): SafeParseResult<ShipmentRatesFetchRequest> {
   const result = ShipmentRatesFetchRequestSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Shipment rates fetch validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -98,12 +101,12 @@ export function validateShipmentRatesFetch(data: unknown): z.SafeParseReturnType
 /**
  * Validate shipment label purchase request
  */
-export function validateShipmentLabelPurchase(data: unknown): z.SafeParseReturnType<unknown, ShipmentLabelPurchaseRequest> {
+export function validateShipmentLabelPurchase(data: unknown): SafeParseResult<ShipmentLabelPurchaseRequest> {
   const result = ShipmentLabelPurchaseRequestSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Shipment label purchase validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -114,12 +117,12 @@ export function validateShipmentLabelPurchase(data: unknown): z.SafeParseReturnT
 /**
  * Validate shipment tracking request
  */
-export function validateShipmentTracking(data: unknown): z.SafeParseReturnType<unknown, ShipmentTrackingRequest> {
+export function validateShipmentTracking(data: unknown): SafeParseResult<ShipmentTrackingRequest> {
   const result = ShipmentTrackingRequestSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('Shipment tracking validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -130,12 +133,12 @@ export function validateShipmentTracking(data: unknown): z.SafeParseReturnType<u
 /**
  * Validate SmartRate request
  */
-export function validateSmartrateRequest(data: unknown): z.SafeParseReturnType<unknown, SmartrateRequest> {
+export function validateSmartrateRequest(data: unknown): SafeParseResult<SmartrateRequest> {
   const result = SmartrateRequestSchema.safeParse(data);
   
   if (!result.success) {
     logger.warn('SmartRate request validation failed', {
-      errors: result.error.errors,
+      errors: result.error.issues,
       data: sanitizeLogData(data)
     });
   }
@@ -444,7 +447,7 @@ export function validateRequestComprehensive<T>(
     return { isValid: true, data: result.data };
   }
 
-  const errors = result.error.errors.map(err => 
+  const errors = result.error.issues.map((err: any) => 
     `${err.path.join('.')}: ${err.message}`
   );
 
