@@ -1,0 +1,130 @@
+{
+  "name": "MCP Shipping Suite Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11",
+      "installTools": true,
+      "optimize": true
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "nodeGypDependencies": true,
+      "installYarnUsingApt": false
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "enableNonRootDocker": true,
+      "moby": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss", 
+        "nrwl.angular-console",
+        "GitHub.copilot",
+        "GitHub.copilot-labs",
+        "ms-vscode.vscode-json",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-eslint",
+        "ms-vscode.vscode-jest",
+        "ms-playwright.playwright",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-markdown",
+        "ms-python.python",
+        "ms-python.flake8",
+        "ms-python.pylint",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "/bin/zsh"
+          }
+        },
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "explicit"
+        },
+        "eslint.workingDirectories": ["apps/*", "libs/*"],
+        "github.copilot.enable": {
+          "*": true,
+          "yaml": true,
+          "plaintext": false,
+          "markdown": true
+        },
+        "files.associations": {
+          "*.env*": "dotenv"
+        },
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.linting.flake8Enabled": true
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 3002, 3003, 5432, 6379],
+  "portsAttributes": {
+    "3000": {
+      "label": "EasyPost MCP Server",
+      "protocol": "http"
+    },
+    "3002": {
+      "label": "Veeqo MCP Server", 
+      "protocol": "http"
+    },
+    "3003": {
+      "label": "Web Dashboard",
+      "protocol": "http"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "protocol": "tcp"
+    },
+    "6379": {
+      "label": "Redis",
+      "protocol": "tcp"
+    }
+  },
+
+  "postCreateCommand": "/bin/bash .devcontainer/post-create.sh",
+  "postStartCommand": "/bin/bash .devcontainer/post-start.sh",
+
+  "remoteUser": "node",
+  "containerUser": "node",
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/.env.development,target=/workspace/.env,type=bind,consistency=cached",
+    "source=mcp-shipping-node-modules,target=/workspace/node_modules,type=volume",
+    "source=mcp-shipping-pnpm-store,target=/home/node/.pnpm-store,type=volume"
+  ],
+
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "PNPM_HOME": "/home/node/.local/share/pnpm",
+    "PATH": "/home/node/.local/share/pnpm:${PATH}"
+  }
+}

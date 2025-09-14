@@ -1,0 +1,226 @@
+{
+  "name": "CI/CD Profile",
+  "description": "Optimized for continuous integration and automated testing",
+  "environment": "ci",
+  "resources": {
+    "cpu": {
+      "cores": 2,
+      "architecture": "x64",
+      "provider": "GitHub Actions ubuntu-latest",
+      "notes": "Standard GitHub Actions runner with 2 cores"
+    },
+    "memory": {
+      "total_gb": 7,
+      "available_for_builds_gb": 6,
+      "swap_gb": 1,
+      "notes": "GitHub Actions standard runner memory allocation"
+    },
+    "storage": {
+      "free_space_gb": 14,
+      "type": "SSD",
+      "cache_space_gb": 4,
+      "notes": "Limited storage requires efficient dependency caching"
+    }
+  },
+  "container_images": {
+    "base": "node:20-alpine",
+    "test_runner": "node:20-alpine",
+    "security_scanner": "aquasec/trivy:latest",
+    "deploy": "alpine:latest",
+    "notes": "Minimal Alpine images for faster CI builds and reduced attack surface"
+  },
+  "build_configuration": {
+    "watch_mode": false,
+    "incremental": false,
+    "source_maps": false,
+    "optimization": true,
+    "bundle_analyzer": false,
+    "parallel_builds": true,
+    "cache_enabled": true,
+    "nx_cache": true,
+    "docker_layer_caching": true
+  },
+  "test_configuration": {
+    "unit_tests": true,
+    "integration_tests": true,
+    "e2e_tests": true,
+    "coverage_reporting": true,
+    "coverage_threshold": 70,
+    "parallel_execution": true,
+    "test_timeout_minutes": 10,
+    "retry_failed_tests": 2
+  },
+  "security_configuration": {
+    "dependency_scanning": true,
+    "vulnerability_scanning": true,
+    "secret_scanning": true,
+    "license_compliance": true,
+    "code_quality_gates": true,
+    "security_policy_enforcement": true
+  },
+  "services": {
+    "test_database": {
+      "image": "postgres:15-alpine",
+      "port": 5432,
+      "environment": "test",
+      "ephemeral": true
+    },
+    "test_redis": {
+      "image": "redis:7-alpine", 
+      "port": 6379,
+      "environment": "test",
+      "ephemeral": true
+    }
+  },
+  "pipeline_stages": [
+    {
+      "name": "setup",
+      "description": "Install dependencies and setup environment",
+      "timeout_minutes": 5,
+      "cache_dependencies": true
+    },
+    {
+      "name": "lint", 
+      "description": "Code linting and formatting checks",
+      "timeout_minutes": 3,
+      "fail_fast": false
+    },
+    {
+      "name": "typecheck",
+      "description": "TypeScript type checking",
+      "timeout_minutes": 5,
+      "fail_fast": true
+    },
+    {
+      "name": "build_libs",
+      "description": "Build shared libraries",
+      "timeout_minutes": 5,
+      "fail_fast": true,
+      "cache_outputs": true
+    },
+    {
+      "name": "build_apps", 
+      "description": "Build applications",
+      "timeout_minutes": 10,
+      "fail_fast": true,
+      "cache_outputs": true,
+      "depends_on": ["build_libs"]
+    },
+    {
+      "name": "test_unit",
+      "description": "Unit tests with coverage",
+      "timeout_minutes": 10,
+      "fail_fast": false,
+      "parallel": true
+    },
+    {
+      "name": "test_integration",
+      "description": "Integration tests",
+      "timeout_minutes": 15,
+      "fail_fast": false,
+      "depends_on": ["build_apps"]
+    },
+    {
+      "name": "test_e2e",
+      "description": "End-to-end tests",
+      "timeout_minutes": 20,
+      "fail_fast": false,
+      "depends_on": ["build_apps"]
+    },
+    {
+      "name": "security_scan",
+      "description": "Security vulnerability scanning",
+      "timeout_minutes": 10,
+      "fail_fast": false,
+      "parallel": true
+    },
+    {
+      "name": "build_containers",
+      "description": "Build and push container images",
+      "timeout_minutes": 15,
+      "fail_fast": true,
+      "depends_on": ["test_unit", "test_integration"],
+      "condition": "github.event_name != 'pull_request'"
+    }
+  ],
+  "ai_integration": {
+    "claude_api": {
+      "enabled": "conditional",
+      "condition": "secrets.CLAUDE_API_KEY && secrets.USE_CLAUDE == 'true'",
+      "timeout_minutes": 5,
+      "fail_fast": false,
+      "purpose": "automated code review and documentation generation"
+    },
+    "claude_prompt_generation": {
+      "enabled": "conditional", 
+      "condition": "secrets.GENERATE_CLAUDE_PROMPT == 'true'",
+      "timeout_minutes": 2,
+      "fail_fast": false,
+      "purpose": "generate prompts for manual Claude web UI usage"
+    },
+    "huggingface_deploy": {
+      "enabled": "conditional",
+      "condition": "secrets.HF_API_TOKEN && secrets.USE_HF == 'true'",
+      "timeout_minutes": 10,
+      "fail_fast": false,
+      "purpose": "deploy models or spaces to Hugging Face"
+    }
+  },
+  "cache_configuration": {
+    "node_modules": {
+      "key": "pnpm-${{ hashFiles('pnpm-lock.yaml') }}",
+      "restore_keys": ["pnpm-"],
+      "paths": ["~/.pnpm-store", "node_modules"]
+    },
+    "nx_cache": {
+      "key": "nx-${{ github.sha }}",
+      "restore_keys": ["nx-"],
+      "paths": [".nx/cache"]
+    },
+    "build_outputs": {
+      "key": "build-${{ github.sha }}-${{ matrix.service }}",
+      "paths": ["dist", "apps/*/dist", "libs/*/dist"]
+    }
+  },
+  "environment_variables": {
+    "NODE_ENV": "test",
+    "CI": "true",
+    "NX_CLOUD_DISTRIBUTED_EXECUTION": "true",
+    "NX_CACHE_DIRECTORY": ".nx/cache",
+    "POSTGRES_PASSWORD": "test",
+    "REDIS_URL": "redis://localhost:6379"
+  },
+  "artifacts": {
+    "test_results": {
+      "path": "test-results/",
+      "retention_days": 30,
+      "include_on_failure": true
+    },
+    "coverage_reports": {
+      "path": "coverage/",
+      "retention_days": 30,
+      "upload_to_codecov": true
+    },
+    "build_logs": {
+      "path": "build-logs/",
+      "retention_days": 7,
+      "include_on_failure": true
+    },
+    "security_reports": {
+      "path": "security-reports/",
+      "retention_days": 90,
+      "upload_to_github": true
+    },
+    "claude_artifacts": {
+      "path": "ARTIFACTS/",
+      "retention_days": 7,
+      "condition": "always"
+    }
+  },
+  "notifications": {
+    "failure_conditions": ["build", "test", "security_scan"],
+    "success_conditions": ["deployment"],
+    "channels": ["github_checks", "pull_request_comments"]
+  },
+  "notes": "CI profile optimized for speed, reliability, and comprehensive testing with optional AI integrations."
+}
