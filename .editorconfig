@@ -1,0 +1,82 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# TypeScript and JavaScript files
+[*.{ts,tsx,js,jsx}]
+indent_size = 2
+max_line_length = 120
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Python files
+[*.py]
+indent_size = 4
+max_line_length = 88
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# Shell scripts
+[*.{sh,bash}]
+indent_size = 2
+
+# Docker files
+[Dockerfile*]
+indent_size = 4
+
+# Environment files
+[*.env*]
+indent_size = 2
+
+# Configuration files
+[*.{toml,ini,cfg}]
+indent_size = 2
+
+# HTML files
+[*.{html,htm}]
+indent_size = 2
+
+# CSS and SCSS files
+[*.{css,scss,sass}]
+indent_size = 2
+
+# XML files
+[*.xml]
+indent_size = 2
+
+# Makefile (tabs required)
+[Makefile]
+indent_style = tab
+
+# Package files
+[package.json]
+indent_size = 2
+
+# Lock files (no formatting)
+[*.lock]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Generated files (no formatting)
+[*.{min.js,min.css}]
+insert_final_newline = false
+trim_trailing_whitespace = false

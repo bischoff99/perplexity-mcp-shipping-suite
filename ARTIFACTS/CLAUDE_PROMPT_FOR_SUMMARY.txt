@@ -1,0 +1,174 @@
+# Claude AI Prompt for MCP Shipping Suite Analysis
+
+Please analyze this TypeScript/Node.js MCP (Model Context Protocol) shipping automation project and provide:
+
+1. **Architecture Review**: Evaluate the Nx monorepo structure with apps (EasyPost MCP, Veeqo MCP, Web Dashboard) and shared libraries
+2. **Code Quality Assessment**: Review TypeScript patterns, error handling, and MCP protocol implementation
+3. **Security Analysis**: Identify potential security vulnerabilities and best practices
+4. **Performance Optimization**: Suggest improvements for API integrations and caching
+5. **Development Experience**: Recommend enhancements to developer tooling and workflows
+6. **Testing Strategy**: Advise on testing approach for MCP servers and integration points
+7. **Documentation Improvements**: Suggest documentation enhancements for better developer onboarding
+
+## Project Context
+- **Tech Stack**: TypeScript, Node.js, Nx monorepo, Next.js, Docker, PostgreSQL, Redis
+- **Purpose**: Shipping automation with EasyPost and Veeqo API integrations
+- **Architecture**: MCP servers (ports 3000, 3002) + Web dashboard (port 3003)
+- **AI Integration**: GitHub Copilot, Claude, Hugging Face Pro
+
+## Current Status
+{
+  "metadata": {
+    "name": "perplexity-mcp-shipping-suite",
+    "version": "1.0.0",
+    "description": "Complete MCP Shipping Automation Suite with EasyPost, Veeqo, and Web Interface",
+    "author": "MCP Shipping Suite Team",
+    "license": "MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/mcp-shipping/perplexity-suite.git"
+    },
+    "keywords": [
+      "mcp",
+      "model-context-protocol",
+      "shipping",
+      "easypost",
+      "veeqo",
+      "automation",
+      "typescript",
+      "docker"
+    ],
+    "engines": {
+      "node": ">=18.0.0",
+      "npm": ">=8.0.0"
+    },
+    "packageManager": "pnpm@8.15.5",
+    "generatedAt": "2025-09-14T00:06:01.469Z"
+  },
+  "structure": {
+    "apps": [
+      {
+        "name": "easypost",
+        "type": "mcp-server",
+        "port": null,
+        "hasTests": true,
+        "hasDockerfile": true,
+        "dependencies": 10
+      },
+      {
+        "name": "veeqo",
+        "type": "mcp-server",
+        "port": null,
+        "hasTests": true,
+        "hasDockerfile": true,
+        "dependencies": 14
+      },
+      {
+        "name": "web-dashboard",
+        "type": "next.js",
+        "port": null,
+        "hasTests": false,
+        "hasDockerfile": false,
+        "dependencies": 8
+      },
+      {
+        "name": "web-dashboard-e2e",
+        "type": "unknown",
+        "port": null,
+        "hasTests": false,
+        "hasDockerfile": false,
+        "dependencies": 0
+      }
+    ],
+    "libs": [
+      {
+        "name": "mcp-client",
+        "type": "shared",
+        "hasTests": false,
+        "dependencies": 1,
+        "isPublished": false
+      },
+      {
+        "name": "shared",
+        "type": "shared",
+        "hasTests": false,
+        "dependencies": 3,
+        "isPublished": true
+      },
+      {
+        "name": "ui-components",
+        "type": "shared",
+        "hasTests": false,
+        "dependencies": 0,
+        "isPublished": true
+      }
+    ],
+    "configs": 166,
+    "docs": 0
+  },
+  "health": {
+    "buildStatus": "failing",
+    "testStatus": "unknown",
+    "lintStatus": "unknown",
+    "dependencies": "installed",
+    "security": "unknown"
+  },
+  "metrics": {
+    "totalFiles": 64,
+    "linesOfCode": 13697,
+    "testCoverage": "unknown",
+    "codeComplexity": "unknown"
+  },
+  "risks": [
+    {
+      "level": "medium",
+      "category": "testing",
+      "description": "Apps without tests: web-dashboard, web-dashboard-e2e",
+      "impact": "Reduced code quality and reliability"
+    }
+  ],
+  "todos": [],
+  "roadmap": [
+    {
+      "phase": "Phase 1: Foundation",
+      "timeline": "Current Sprint",
+      "items": [
+        "Complete Cursor workspace integration",
+        "Implement AI tooling workflows",
+        "Set up comprehensive testing suite",
+        "Enhance documentation"
+      ]
+    },
+    {
+      "phase": "Phase 2: Enhancement",
+      "timeline": "Next 2-4 weeks",
+      "items": [
+        "Implement advanced MCP features",
+        "Add monitoring and observability",
+        "Performance optimization",
+        "Security hardening"
+      ]
+    },
+    {
+      "phase": "Phase 3: Scale",
+      "timeline": "Next 1-2 months",
+      "items": [
+        "Multi-tenant support",
+        "Advanced shipping automations",
+        "API rate limiting and caching",
+        "Production deployment optimization"
+      ]
+    }
+  ]
+}
+
+## Specific Areas of Interest
+1. MCP protocol implementation patterns
+2. API integration error handling and rate limiting  
+3. TypeScript type safety and validation with Zod
+4. Monorepo dependency management and build optimization
+5. Security best practices for API keys and webhooks
+6. Testing strategies for external API integrations
+7. Development workflow optimization with AI tooling
+
+Please provide specific, actionable recommendations with code examples where appropriate.

@@ -1,0 +1,270 @@
+{
+  "name": "Production Profile",
+  "description": "Optimized for production deployment with security, performance, and reliability",
+  "environment": "production",
+  "resources": {
+    "cpu": {
+      "cores": 4,
+      "architecture": "x64",
+      "recommended_minimum": "2 cores per service",
+      "scaling": "horizontal pod autoscaling",
+      "notes": "Multi-core for handling concurrent MCP requests and API calls"
+    },
+    "memory": {
+      "total_gb": 8,
+      "per_service_gb": 2,
+      "buffer_gb": 2,
+      "recommended_minimum_gb": 4,
+      "notes": "Memory allocation includes buffer for traffic spikes"
+    },
+    "storage": {
+      "persistent_gb": 100,
+      "cache_gb": 20,
+      "logs_gb": 50,
+      "type": "SSD",
+      "backup_retention_days": 30,
+      "notes": "Fast storage for database and log persistence"
+    },
+    "network": {
+      "bandwidth_mbps": 1000,
+      "load_balancer": true,
+      "cdn": true,
+      "ssl_termination": true
+    }
+  },
+  "container_images": {
+    "base": "node:20-alpine",
+    "production": "node:20-alpine",
+    "database": "postgres:15",
+    "cache": "redis:7",
+    "load_balancer": "nginx:alpine",
+    "monitoring": "prom/prometheus:latest",
+    "notes": "Security-hardened images with minimal attack surface"
+  },
+  "security_configuration": {
+    "container_scanning": true,
+    "runtime_security": true,
+    "network_policies": true,
+    "secret_management": "kubernetes_secrets",
+    "rbac_enabled": true,
+    "pod_security_standards": "restricted",
+    "vulnerability_monitoring": true,
+    "compliance_scanning": true
+  },
+  "services": {
+    "web_dashboard": {
+      "port": 3003,
+      "replicas": 2,
+      "health_check": "/health",
+      "readiness_probe": "/ready",
+      "liveness_probe": "/health",
+      "resource_limits": {
+        "cpu": "1000m",
+        "memory": "2Gi"
+      },
+      "resource_requests": {
+        "cpu": "500m", 
+        "memory": "1Gi"
+      }
+    },
+    "easypost_mcp": {
+      "port": 3000,
+      "replicas": 3,
+      "health_check": "/health",
+      "readiness_probe": "/ready",
+      "liveness_probe": "/health",
+      "resource_limits": {
+        "cpu": "1000m",
+        "memory": "2Gi"
+      },
+      "resource_requests": {
+        "cpu": "500m",
+        "memory": "1Gi"
+      },
+      "auto_scaling": {
+        "min_replicas": 2,
+        "max_replicas": 10,
+        "target_cpu_utilization": 70
+      }
+    },
+    "veeqo_mcp": {
+      "port": 3002,
+      "replicas": 3,
+      "health_check": "/health", 
+      "readiness_probe": "/ready",
+      "liveness_probe": "/health",
+      "resource_limits": {
+        "cpu": "1000m",
+        "memory": "2Gi"
+      },
+      "resource_requests": {
+        "cpu": "500m",
+        "memory": "1Gi"
+      },
+      "auto_scaling": {
+        "min_replicas": 2,
+        "max_replicas": 10,
+        "target_cpu_utilization": 70
+      }
+    },
+    "postgresql": {
+      "port": 5432,
+      "replicas": 1,
+      "storage": "100Gi",
+      "backup_schedule": "0 2 * * *",
+      "high_availability": true,
+      "connection_pooling": true,
+      "resource_limits": {
+        "cpu": "2000m",
+        "memory": "4Gi"
+      }
+    },
+    "redis": {
+      "port": 6379,
+      "replicas": 3,
+      "cluster_mode": true,
+      "persistence": true,
+      "backup_schedule": "0 */6 * * *",
+      "resource_limits": {
+        "cpu": "500m",
+        "memory": "1Gi"
+      }
+    }
+  },
+  "build_configuration": {
+    "watch_mode": false,
+    "incremental": false,
+    "source_maps": false,
+    "optimization": true,
+    "minification": true,
+    "tree_shaking": true,
+    "bundle_analyzer": false,
+    "parallel_builds": false,
+    "cache_enabled": false
+  },
+  "monitoring": {
+    "metrics": {
+      "prometheus": true,
+      "grafana_dashboards": true,
+      "custom_metrics": ["mcp_request_duration", "api_response_time", "error_rate"]
+    },
+    "logging": {
+      "centralized": true,
+      "log_level": "info",
+      "structured": true,
+      "retention_days": 30,
+      "real_time_alerts": true
+    },
+    "tracing": {
+      "enabled": true,
+      "jaeger": true,
+      "sample_rate": 0.1
+    },
+    "health_checks": {
+      "interval_seconds": 30,
+      "timeout_seconds": 10,
+      "failure_threshold": 3,
+      "success_threshold": 1
+    }
+  },
+  "performance": {
+    "response_time_targets": {
+      "p50": "100ms",
+      "p95": "500ms", 
+      "p99": "1000ms"
+    },
+    "throughput_targets": {
+      "requests_per_second": 1000,
+      "concurrent_connections": 500
+    },
+    "caching": {
+      "application_cache": true,
+      "redis_cache": true,
+      "cdn_cache": true,
+      "cache_ttl_seconds": 300
+    },
+    "rate_limiting": {
+      "requests_per_minute": 1000,
+      "burst_capacity": 100,
+      "sliding_window": true
+    }
+  },
+  "deployment": {
+    "strategy": "rolling_update",
+    "max_unavailable": 1,
+    "max_surge": 1,
+    "readiness_delay": 30,
+    "rollback_on_failure": true,
+    "blue_green_capable": true,
+    "canary_deployments": true
+  },
+  "backup_and_recovery": {
+    "database_backups": {
+      "schedule": "0 2 * * *",
+      "retention_days": 30,
+      "point_in_time_recovery": true,
+      "cross_region_replication": true
+    },
+    "application_backups": {
+      "configuration": true,
+      "secrets": true,
+      "persistent_volumes": true
+    },
+    "disaster_recovery": {
+      "rto_minutes": 30,
+      "rpo_minutes": 5,
+      "multi_zone": true,
+      "automated_failover": true
+    }
+  },
+  "environment_variables": {
+    "NODE_ENV": "production",
+    "LOG_LEVEL": "info",
+    "METRICS_ENABLED": "true",
+    "CACHE_TTL": "300",
+    "RATE_LIMIT_WINDOW": "60000",
+    "HEALTH_CHECK_INTERVAL": "30000"
+  },
+  "secrets_management": {
+    "api_keys": "kubernetes_secrets",
+    "database_credentials": "kubernetes_secrets", 
+    "jwt_secrets": "kubernetes_secrets",
+    "encryption_keys": "kubernetes_secrets",
+    "rotation_policy": "90_days"
+  },
+  "compliance": {
+    "data_protection": ["GDPR", "CCPA"],
+    "security_standards": ["SOC2", "ISO27001"],
+    "audit_logging": true,
+    "data_encryption": {
+      "at_rest": true,
+      "in_transit": true,
+      "key_management": "kubernetes_secrets"
+    }
+  },
+  "ai_tooling": {
+    "github_copilot": {
+      "enabled": false,
+      "notes": "Not applicable in production environment"
+    },
+    "claude_integration": {
+      "enabled": false,
+      "notes": "Development and CI only"
+    },
+    "huggingface": {
+      "inference_api": "conditional",
+      "condition": "feature_flags.ai_features_enabled",
+      "rate_limiting": true,
+      "monitoring": true
+    }
+  },
+  "cost_optimization": {
+    "resource_monitoring": true,
+    "auto_scaling": true,
+    "spot_instances": false,
+    "reserved_capacity": true,
+    "cost_alerts": true,
+    "budget_limits": true
+  },
+  "notes": "Production profile focused on security, reliability, performance, and compliance with comprehensive monitoring and disaster recovery capabilities."
+}

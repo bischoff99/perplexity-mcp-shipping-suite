@@ -1,16 +1,56 @@
 {
   "recommendations": [
+    // AI-Powered Development
     "github.copilot",
+    "github.copilot-labs",
     "github.copilot-chat",
+
+    // Core Language Support
     "ms-vscode.vscode-typescript-next",
+    "ms-python.python",
+    "ms-python.flake8",
+    "ms-python.pylint",
+    "charliermarsh.ruff",
+
+    // Code Formatting & Linting
     "esbenp.prettier-vscode",
-    "ms-vscode.eslint",
+    "ms-vscode.vscode-eslint",
     "bradlc.vscode-tailwindcss",
+
+    // Build System & Monorepo
+    "nrwl.angular-console",
+
+    // Testing
+    "ms-vscode.vscode-jest",
+    "ms-playwright.playwright",
+    "firsttris.vscode-jest-runner",
+
+    // File Formats & Configuration
     "ms-vscode.vscode-json",
     "redhat.vscode-yaml",
-    "ms-vscode.docker",
-    "nrwl.angular-console",
-    "ms-vscode.test-adapter-converter",
-    "firsttris.vscode-jest-runner"
+    "ms-vscode.vscode-markdown",
+
+    // Container & Deployment
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+
+    // Git & Version Control
+    "github.vscode-pull-request-github",
+    "eamodio.gitlens",
+
+    // Development Experience
+    "ms-vscode.vscode-terminal",
+    "ms-vscode.live-server",
+    "humao.rest-client",
+
+    // Documentation
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "ms-vscode.vscode-css",
+    "formulahendry.auto-rename-tag"
   ]
 }

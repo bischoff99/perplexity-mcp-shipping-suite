@@ -1,0 +1,197 @@
+{
+  "name": "Development Profile",
+  "description": "Optimized for local development with hot reload and debugging",
+  "environment": "development",
+  "resources": {
+    "cpu": {
+      "cores": 4,
+      "architecture": "x64",
+      "recommended_minimum": "Intel i5 / AMD Ryzen 5",
+      "notes": "Nx build system benefits from multiple cores for parallel builds"
+    },
+    "memory": {
+      "total_gb": 16,
+      "available_for_development_gb": 12,
+      "recommended_minimum_gb": 8,
+      "notes": "TypeScript compilation and multiple services running concurrently"
+    },
+    "storage": {
+      "free_space_gb": 50,
+      "type": "SSD recommended",
+      "notes": "Fast storage improves build times and file watching"
+    }
+  },
+  "container_images": {
+    "base": "node:20-alpine",
+    "development": "mcr.microsoft.com/devcontainers/typescript-node:20",
+    "database": "postgres:15-alpine",
+    "cache": "redis:7-alpine",
+    "notes": "Alpine images for smaller size, full images for development features"
+  },
+  "recommended_extensions": [
+    {
+      "id": "ms-vscode.vscode-typescript-next",
+      "name": "TypeScript Importer",
+      "category": "language",
+      "priority": "high"
+    },
+    {
+      "id": "bradlc.vscode-tailwindcss",
+      "name": "Tailwind CSS IntelliSense", 
+      "category": "styling",
+      "priority": "high"
+    },
+    {
+      "id": "nrwl.angular-console",
+      "name": "Nx Console",
+      "category": "build",
+      "priority": "high"
+    },
+    {
+      "id": "GitHub.copilot",
+      "name": "GitHub Copilot",
+      "category": "ai",
+      "priority": "high"
+    },
+    {
+      "id": "GitHub.copilot-labs",
+      "name": "GitHub Copilot Labs",
+      "category": "ai", 
+      "priority": "medium"
+    },
+    {
+      "id": "ms-vscode.vscode-json",
+      "name": "JSON Language Features",
+      "category": "language",
+      "priority": "high"
+    },
+    {
+      "id": "esbenp.prettier-vscode",
+      "name": "Prettier - Code formatter",
+      "category": "formatting",
+      "priority": "high"
+    },
+    {
+      "id": "ms-vscode.vscode-eslint",
+      "name": "ESLint",
+      "category": "linting",
+      "priority": "high"
+    },
+    {
+      "id": "ms-vscode.vscode-jest",
+      "name": "Jest",
+      "category": "testing",
+      "priority": "medium"
+    },
+    {
+      "id": "ms-playwright.playwright",
+      "name": "Playwright Test for VSCode",
+      "category": "testing",
+      "priority": "medium"
+    },
+    {
+      "id": "ms-vscode-remote.remote-containers",
+      "name": "Dev Containers",
+      "category": "containers",
+      "priority": "medium"
+    },
+    {
+      "id": "ms-azuretools.vscode-docker",
+      "name": "Docker",
+      "category": "containers",
+      "priority": "medium"
+    },
+    {
+      "id": "redhat.vscode-yaml",
+      "name": "YAML",
+      "category": "language",
+      "priority": "medium"
+    },
+    {
+      "id": "ms-vscode.vscode-markdown",
+      "name": "Markdown Language Features",
+      "category": "documentation",
+      "priority": "medium"
+    }
+  ],
+  "development_settings": {
+    "auto_save": "onWindowChange",
+    "format_on_save": true,
+    "hot_reload": true,
+    "source_maps": true,
+    "debug_configuration": "Node.js + TypeScript",
+    "watch_mode": true,
+    "live_reload": true
+  },
+  "services": {
+    "web_dashboard": {
+      "port": 3003,
+      "url": "http://localhost:3003",
+      "framework": "Next.js",
+      "hot_reload": true
+    },
+    "easypost_mcp": {
+      "port": 3000,
+      "url": "http://localhost:3000",
+      "protocol": "MCP JSON-RPC",
+      "health_check": "http://localhost:3000/health"
+    },
+    "veeqo_mcp": {
+      "port": 3002,
+      "url": "http://localhost:3002", 
+      "protocol": "MCP JSON-RPC",
+      "health_check": "http://localhost:3002/health"
+    },
+    "postgresql": {
+      "port": 5432,
+      "host": "localhost",
+      "database": "shipping_dev"
+    },
+    "redis": {
+      "port": 6379,
+      "host": "localhost",
+      "purpose": "caching and session storage"
+    }
+  },
+  "build_configuration": {
+    "watch_mode": true,
+    "incremental": true,
+    "source_maps": true,
+    "optimization": false,
+    "bundle_analyzer": false,
+    "parallel_builds": true,
+    "cache_enabled": true
+  },
+  "scripts": {
+    "start": "pnpm run dev",
+    "build": "pnpm run build:libs && pnpm run build:apps",
+    "test": "pnpm run test:watch",
+    "lint": "pnpm run lint:fix",
+    "typecheck": "pnpm run typecheck --watch"
+  },
+  "ai_tooling": {
+    "github_copilot": {
+      "enabled": true,
+      "inline_suggestions": true,
+      "tab_completion": true,
+      "chat_enabled": true
+    },
+    "cursor_ai": {
+      "enabled": true,
+      "composer_mode": true,
+      "auto_complete": true,
+      "code_review": true
+    },
+    "claude_integration": {
+      "local_cli": true,
+      "web_ui_fallback": true,
+      "prompt_generation": true
+    },
+    "huggingface": {
+      "local_inference": false,
+      "api_access": true,
+      "model_testing": true
+    }
+  },
+  "notes": "Development profile optimized for productivity with hot reload, comprehensive debugging, and AI assistance enabled."
+}
