@@ -1,22 +1,22 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
-  "files": [],
-  "references": [
-    {
-      "path": "./apps/veeqo/libs/shared"
-    },
-    {
-      "path": "./libs/mcp-client"
-    },
-    {
-      "path": "./libs/ui-components"
-    },
-    {
-      "path": "./apps/web-dashboard-e2e"
-    },
-    {
-      "path": "./apps/web-dashboard"
+  "extends": "./config/typescript/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@perplexity/shared": ["libs/shared/src/index.ts"],
+      "@perplexity/mcp-client": ["libs/mcp-client/src/index.ts"],
+      "@perplexity/ui-components": ["libs/ui-components/src/index.ts"],
+      "@perplexity/types": ["libs/types/src/index.ts"]
     }
+  },
+  "include": [
+    "apps/**/*",
+    "libs/**/*",
+    "tools/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".nx"
   ]
 }

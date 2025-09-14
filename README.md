@@ -113,26 +113,32 @@ docker-compose down
 
 ## 🛠️ Development
 
-### GitHub Copilot Integration
-
-This repository is fully configured for GitHub Copilot with:
-- **Comprehensive project context** in `.github/copilot-instructions.md`
-- **VS Code workspace configuration** with optimized settings
-- **Code snippets** for common MCP patterns
-- **Debug configurations** for all services
-- **Security exclusions** via `.copilotignore`
-
-**Getting Started with Copilot:**
+### Quick Start
 ```bash
-# Install required extensions
-code --install-extension github.copilot
-code --install-extension github.copilot-chat
+# Install dependencies
+pnpm install
 
-# Open the configured workspace
-code .vscode/perplexity-mcp.code-workspace
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# Start development
+pnpm run dev
 ```
 
-See [GitHub Copilot Guide](./docs/github-copilot-guide.md) for detailed usage instructions.
+### Documentation
+- **[Development Guide](./docs/DEVELOPMENT.md)** - Complete development setup and workflow
+- **[API Documentation](./docs/API.md)** - MCP tools and API reference
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment instructions
+
+### AI Integration
+This repository is configured for AI development with:
+- **GitHub Copilot** - Code completion and chat
+- **Claude Integration** - AI assistant support
+- **Hugging Face** - Model deployment and inference
+- **Cursor AI** - Enhanced development experience
+
+See [Development Guide](./docs/DEVELOPMENT.md) for detailed AI integration instructions.
 
 ### Project Structure
 
@@ -371,18 +377,14 @@ DEBUG_MODE=true pnpm run dev
 
 ## 📚 API Documentation
 
-### EasyPost MCP Server
+### MCP Servers
+- **EasyPost MCP Server**: 6 shipping automation tools
+- **Veeqo MCP Server**: 19 inventory and order management tools
+- **Complete API Reference**: [API Documentation](./docs/API.md)
 
-- **Tools**: 6 comprehensive shipping tools
-- **Resources**: Account and carrier information
-- **Documentation**: [./easypost/README.md](./easypost/README.md)
-
-### Veeqo MCP Server
-
-- **Tools**: 15+ inventory and order management tools
-- **Resources**: Account, stores, warehouses, channels
-- **Webhooks**: Real-time event processing
-- **Documentation**: [./veeqo/README.md](./veeqo/README.md)
+### Service Documentation
+- **[EasyPost MCP Server](./apps/easypost/README.md)** - Shipping API integration
+- **[Veeqo MCP Server](./apps/veeqo/README.md)** - Inventory management
 
 ## 🤝 Contributing
 

@@ -1,115 +1,22 @@
 {
-  // GitHub Copilot AI Configuration
-  "github.copilot.enable": {
-    "*": true,
-    "yaml": true,
-    "plaintext": false,
-    "markdown": true,
-    "typescript": true,
-    "javascript": true,
-    "json": true,
-    "dockerfile": true,
-    "python": true
-  },
-  "github.copilot.editor.enableAutoCompletions": true,
-  "github.copilot.editor.enableCodeActions": true,
-  "github.copilot.chat.enabled": true,
-  "github.copilot.chat.localeOverride": "en",
-
-  // Editor and File Configuration
-  "editor.inlineSuggest.enabled": true,
-  "editor.inlineSuggest.showToolbar": "always",
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit",
-    "source.fixAll": "explicit"
-  },
-  "editor.tabSize": 2,
-  "editor.insertSpaces": true,
-  "editor.detectIndentation": false,
-
-  // TypeScript Configuration
-  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "npm.packageManager": "pnpm",
+  "typescript.preferences.includePackageJsonAutoImports": "on",
   "typescript.suggest.autoImports": true,
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  "typescript.inlayHints.parameterNames.enabled": "all",
-  "typescript.inlayHints.parameterTypes.enabled": true,
-  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
-
-  // ESLint Configuration
-  "eslint.enable": true,
-  "eslint.workingDirectories": ["apps/*", "libs/*"],
-  "eslint.validate": ["typescript", "javascript", "typescriptreact", "javascriptreact"],
-
-  // Python Configuration
-  "python.defaultInterpreterPath": "/usr/local/bin/python",
-  "python.terminal.activateEnvironment": true,
-  "python.formatting.provider": "black",
-  "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true,
-  "python.linting.flake8Enabled": true,
-  "python.analysis.typeCheckingMode": "basic",
-
-  // File Associations
-  "files.associations": {
-    ".cursorrules": "markdown",
-    ".copilotignore": "gitignore",
-    "*.env*": "dotenv",
-    "*.mcp.json": "json",
-    "docker-compose*.yml": "dockercompose"
+  "eslint.workingDirectories": [
+    "apps/*",
+    "libs/*"
+  ],
+  "nx.enableLibraryImports": true,
+  "nx.showProjectGraph": true,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.nx": false
   },
-
-  // Workspace Configuration
-  "workbench.editor.enablePreview": false,
-  "workbench.editor.revealIfOpen": true,
-  "workbench.startupEditor": "readme",
-
-  // Nx Console Configuration
-  "nxConsole.generateAiAgentRules": true,
-  "nxConsole.enableTaskExecutionDryRunOnChange": true,
-
-  // Git Configuration
-  "git.autofetch": true,
-  "git.enableSmartCommit": true,
-  "git.confirmSync": false,
-
-  // Search Configuration
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true,
-    "**/.nx": true,
-    "**/coverage": true,
-    "**/.git": true
+    "**/.nx": true
   },
-
-  // File Watcher Configuration
-  "files.watcherExclude": {
-    "**/node_modules/**": true,
-    "**/dist/**": true,
-    "**/.nx/**": true,
-    "**/coverage/**": true
-  },
-
-  // Terminal Configuration
-  "terminal.integrated.defaultProfile.linux": "zsh",
-  "terminal.integrated.profiles.linux": {
-    "zsh": {
-      "path": "/bin/zsh"
-    }
-  },
-
-  // Auto Save Configuration
-  "files.autoSave": "onWindowChange",
-  "files.autoSaveDelay": 1000,
-
-  // Extension-specific Settings
-  "prettier.requireConfig": true,
-  "emmet.includeLanguages": {
-    "typescript": "typescriptreact",
-    "javascript": "javascriptreact"
-  }
+  "nxConsole.generateAiAgentRules": true
 }

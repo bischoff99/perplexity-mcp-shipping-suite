@@ -1,12 +1,15 @@
 # Cursor IDE Rules for Perplexity MCP Shipping Suite
 
 # Project Overview
+
 This is a comprehensive MCP (Model Context Protocol) Shipping Automation Suite with:
+
 - Web Interface (HTML/CSS/JS) on port 3003
 - EasyPost MCP Server (TypeScript) on port 3000
 - Veeqo MCP Server (TypeScript) on port 3002
 
 # Development Guidelines
+
 - Use TypeScript for all server-side code
 - Follow MCP protocol standards (JSON-RPC 2.0)
 - Implement proper error handling and logging
@@ -15,6 +18,7 @@ This is a comprehensive MCP (Model Context Protocol) Shipping Automation Suite w
 - Use Docker for containerization
 
 # Code Style
+
 - Use 2-space indentation
 - Use semicolons
 - Use single quotes for strings
@@ -23,36 +27,42 @@ This is a comprehensive MCP (Model Context Protocol) Shipping Automation Suite w
 - Use UPPER_CASE for constants
 
 # File Organization
+
 - Keep related functionality together
 - Use clear, descriptive file names
 - Separate concerns (handlers, types, utilities)
 - Use index files for clean exports
 
 # Testing
+
 - Write unit tests for all functions
 - Use Jest for testing framework
 - Aim for 80%+ code coverage
 - Test error scenarios
 
 # Security
+
 - Never commit API keys or secrets
 - Use environment variables for configuration
 - Validate all inputs
 - Implement proper authentication
 
 # Performance
+
 - Use connection pooling for databases
 - Implement caching where appropriate
 - Monitor memory usage
 - Optimize for production deployment
 
 # Documentation
+
 - Write clear README files
 - Document all public APIs
 - Include usage examples
 - Keep documentation up to date
 
 # MCP Specific
+
 - Follow MCP protocol specifications
 - Implement proper tool definitions
 - Use structured error responses
@@ -60,6 +70,7 @@ This is a comprehensive MCP (Model Context Protocol) Shipping Automation Suite w
 - Implement health checks
 
 # Shipping Integration
+
 - Use FedEx as primary carrier
 - Validate all shipments against carrier standards
 - Implement proper error handling for API failures
@@ -67,6 +78,7 @@ This is a comprehensive MCP (Model Context Protocol) Shipping Automation Suite w
 - Maintain audit logs
 
 # Web Interface
+
 - Use modern CSS (Grid, Flexbox)
 - Implement responsive design
 - Use semantic HTML
@@ -74,6 +86,7 @@ This is a comprehensive MCP (Model Context Protocol) Shipping Automation Suite w
 - Implement proper error handling
 
 # Deployment
+
 - Use Docker for containerization
 - Implement health checks
 - Use environment-based configuration

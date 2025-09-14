@@ -5,7 +5,6 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "extends": ["eslint:recommended"],
       "rules": {
         "@nx/enforce-module-boundaries": [
           "error",
@@ -24,22 +23,13 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "extends": ["eslint:recommended"],
-      "parser": "@typescript-eslint/parser",
-      "plugins": ["@typescript-eslint"],
-      "rules": {
-        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-        "@typescript-eslint/no-explicit-any": "warn",
-        "prefer-const": "error"
-      }
+      "extends": ["../../config/eslint/.eslintrc.json"],
+      "rules": {}
     },
     {
       "files": ["*.js", "*.jsx"],
-      "extends": ["eslint:recommended"],
-      "rules": {
-        "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-        "prefer-const": "error"
-      }
+      "extends": ["../../config/eslint/.eslintrc.json"],
+      "rules": {}
     }
   ]
 }

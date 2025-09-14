@@ -3,12 +3,14 @@
     "nodes": {
       "web-dashboard-e2e": {
         "name": "web-dashboard-e2e",
-        "type": "app",
+        "type": "e2e",
         "data": {
           "root": "apps/web-dashboard-e2e",
           "name": "web-dashboard-e2e",
           "tags": [
-            "npm:private"
+            "npm:private",
+            "type:e2e",
+            "scope:web-dashboard"
           ],
           "implicitDependencies": [
             "web-dashboard"
@@ -20,7 +22,40 @@
               "isInPackageManagerWorkspaces": true
             }
           },
-          "targets": {}
+          "targets": {
+            "e2e": {
+              "executor": "@nx/playwright:playwright",
+              "outputs": [
+                "{workspaceRoot}/dist/.playwright"
+              ],
+              "options": {
+                "config": "apps/web-dashboard-e2e/playwright.config.ts"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "apps/web-dashboard-e2e/**/*.{js,ts}"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/web-dashboard-e2e/src",
+          "projectType": "application"
         }
       },
       "ui-components": {
@@ -30,7 +65,9 @@
           "root": "libs/ui-components",
           "name": "ui-components",
           "tags": [
-            "npm:public"
+            "npm:public",
+            "type:lib",
+            "scope:ui-components"
           ],
           "metadata": {
             "targetGroups": {},
@@ -58,8 +95,74 @@
               "options": {},
               "configurations": {},
               "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/vite:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/ui-components"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/ui-components/**/*.{ts,tsx,js,jsx}"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            },
+            "test": {
+              "executor": "@nx/vite:test",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "reportsDirectory": "../../coverage/libs/ui-components"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "typecheck": {
+              "executor": "@nx/vite:test",
+              "options": {
+                "config": "libs/ui-components/vite.config.ts",
+                "run": false,
+                "typecheck": true
+              },
+              "configurations": {},
+              "parallelism": true
             }
           },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/ui-components/src",
+          "projectType": "library",
           "implicitDependencies": []
         }
       },
@@ -226,7 +329,9 @@
           "root": "libs/mcp-client",
           "name": "mcp-client",
           "tags": [
-            "npm:private"
+            "npm:private",
+            "type:lib",
+            "scope:mcp-client"
           ],
           "metadata": {
             "targetGroups": {},
@@ -245,16 +350,92 @@
               "isInPackageManagerWorkspaces": true
             }
           },
-          "targets": {},
+          "targets": {
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/mcp-client",
+                "main": "libs/mcp-client/src/index.ts",
+                "tsConfig": "libs/mcp-client/tsconfig.lib.json",
+                "assets": []
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/mcp-client/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/mcp-client/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "coverageReporters": [
+                    "text"
+                  ]
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "typecheck": {
+              "executor": "@nx/js:tsc",
+              "options": {
+                "tsConfig": "libs/mcp-client/tsconfig.lib.json",
+                "noEmit": true
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/mcp-client/src",
+          "projectType": "library",
           "implicitDependencies": []
         }
       },
-      "@mcp-shipping/easypost-mcp-server": {
-        "name": "@mcp-shipping/easypost-mcp-server",
-        "type": "lib",
+      "easypost": {
+        "name": "easypost",
+        "type": "app",
         "data": {
           "root": "apps/easypost",
-          "name": "@mcp-shipping/easypost-mcp-server",
+          "name": "easypost",
           "tags": [
             "npm:public",
             "npm:mcp",
@@ -264,21 +445,19 @@
             "npm:api",
             "npm:json-rpc",
             "npm:typescript",
-            "npm:docker"
+            "npm:docker",
+            "type:app",
+            "scope:easypost"
           ],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
-                "build",
                 "dev",
                 "start",
                 "clean",
-                "typecheck",
-                "test",
                 "test:watch",
                 "test:coverage",
                 "test:e2e",
-                "lint",
                 "lint:fix",
                 "format",
                 "format:check",
@@ -296,25 +475,6 @@
             }
           },
           "targets": {
-            "build": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "build"
-              },
-              "metadata": {
-                "scriptContent": "tsc --build",
-                "runCommand": "pnpm run build"
-              },
-              "configurations": {},
-              "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
-            },
             "dev": {
               "executor": "nx:run-script",
               "options": {
@@ -351,35 +511,6 @@
               "configurations": {},
               "parallelism": true
             },
-            "typecheck": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "typecheck"
-              },
-              "metadata": {
-                "scriptContent": "tsc --noEmit",
-                "runCommand": "pnpm run typecheck"
-              },
-              "configurations": {},
-              "parallelism": true
-            },
-            "test": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "test"
-              },
-              "metadata": {
-                "scriptContent": "jest --passWithNoTests",
-                "runCommand": "pnpm run test"
-              },
-              "configurations": {},
-              "parallelism": true,
-              "inputs": [
-                "default",
-                "^production",
-                "{workspaceRoot}/jest.preset.js"
-              ]
-            },
             "test:watch": {
               "executor": "nx:run-script",
               "options": {
@@ -415,23 +546,6 @@
               },
               "configurations": {},
               "parallelism": true
-            },
-            "lint": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "lint"
-              },
-              "metadata": {
-                "scriptContent": "eslint src tests --ext .ts",
-                "runCommand": "pnpm run lint"
-              },
-              "configurations": {},
-              "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json",
-                "{workspaceRoot}/.eslintignore"
-              ]
             },
             "lint:fix": {
               "executor": "nx:run-script",
@@ -525,17 +639,261 @@
               "options": {},
               "configurations": {},
               "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/apps/easypost",
+                "main": "apps/easypost/src/index.ts",
+                "tsConfig": "apps/easypost/tsconfig.json",
+                "assets": []
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "easypost:build",
+                "inspect": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "easypost:build"
+                },
+                "production": {
+                  "buildTarget": "easypost:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "apps/easypost/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/easypost/jest.config.cjs",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "coverageReporters": [
+                    "text"
+                  ]
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "typecheck": {
+              "executor": "@nx/js:tsc",
+              "options": {
+                "tsConfig": "apps/easypost/tsconfig.json",
+                "noEmit": true
+              },
+              "configurations": {},
+              "parallelism": true
             }
           },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/easypost/src",
+          "projectType": "application",
           "implicitDependencies": []
         }
       },
-      "@mcp-shipping/veeqo-mcp-server": {
-        "name": "@mcp-shipping/veeqo-mcp-server",
+      "@perplexity/shared": {
+        "name": "@perplexity/shared",
         "type": "lib",
         "data": {
+          "root": "libs/shared",
+          "name": "@perplexity/shared",
+          "tags": [
+            "npm:public",
+            "npm:mcp",
+            "npm:shipping",
+            "npm:shared",
+            "npm:utilities",
+            "npm:types",
+            "type:lib",
+            "scope:shared"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "clean",
+                "dev"
+              ]
+            },
+            "description": "Shared utilities and types for MCP shipping automation platform",
+            "js": {
+              "packageName": "@mcp-shipping/shared",
+              "packageExports": {
+                ".": {
+                  "import": "./dist/index.js",
+                  "types": "./dist/index.d.ts"
+                }
+              },
+              "packageMain": "dist/index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "targets": {
+            "clean": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "clean"
+              },
+              "metadata": {
+                "scriptContent": "rm -rf dist",
+                "runCommand": "pnpm run clean"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "dev": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "dev"
+              },
+              "metadata": {
+                "scriptContent": "tsc --build --watch",
+                "runCommand": "pnpm run dev"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared",
+                "main": "libs/shared/src/index.ts",
+                "tsConfig": "libs/shared/tsconfig.lib.json",
+                "assets": []
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/shared/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "coverageReporters": [
+                    "text"
+                  ]
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "typecheck": {
+              "executor": "@nx/js:tsc",
+              "options": {
+                "tsConfig": "libs/shared/tsconfig.lib.json",
+                "noEmit": true
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "veeqo": {
+        "name": "veeqo",
+        "type": "app",
+        "data": {
           "root": "apps/veeqo",
-          "name": "@mcp-shipping/veeqo-mcp-server",
+          "name": "veeqo",
           "tags": [
             "npm:public",
             "npm:mcp",
@@ -550,21 +908,19 @@
             "npm:orders",
             "npm:products",
             "npm:warehouse",
-            "npm:webhooks"
+            "npm:webhooks",
+            "type:app",
+            "scope:veeqo"
           ],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
-                "build",
                 "dev",
                 "start",
                 "clean",
-                "typecheck",
-                "test",
                 "test:watch",
                 "test:coverage",
                 "test:e2e",
-                "lint",
                 "lint:fix",
                 "format",
                 "format:check",
@@ -583,25 +939,6 @@
             }
           },
           "targets": {
-            "build": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "build"
-              },
-              "metadata": {
-                "scriptContent": "tsc --build",
-                "runCommand": "pnpm run build"
-              },
-              "configurations": {},
-              "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
-            },
             "dev": {
               "executor": "nx:run-script",
               "options": {
@@ -638,35 +975,6 @@
               "configurations": {},
               "parallelism": true
             },
-            "typecheck": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "typecheck"
-              },
-              "metadata": {
-                "scriptContent": "tsc --noEmit",
-                "runCommand": "pnpm run typecheck"
-              },
-              "configurations": {},
-              "parallelism": true
-            },
-            "test": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "test"
-              },
-              "metadata": {
-                "scriptContent": "jest --passWithNoTests",
-                "runCommand": "pnpm run test"
-              },
-              "configurations": {},
-              "parallelism": true,
-              "inputs": [
-                "default",
-                "^production",
-                "{workspaceRoot}/jest.preset.js"
-              ]
-            },
             "test:watch": {
               "executor": "nx:run-script",
               "options": {
@@ -702,23 +1010,6 @@
               },
               "configurations": {},
               "parallelism": true
-            },
-            "lint": {
-              "executor": "nx:run-script",
-              "options": {
-                "script": "lint"
-              },
-              "metadata": {
-                "scriptContent": "eslint src tests --ext .ts",
-                "runCommand": "pnpm run lint"
-              },
-              "configurations": {},
-              "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json",
-                "{workspaceRoot}/.eslintignore"
-              ]
             },
             "lint:fix": {
               "executor": "nx:run-script",
@@ -824,8 +1115,103 @@
               "options": {},
               "configurations": {},
               "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/apps/veeqo",
+                "main": "apps/veeqo/src/index.ts",
+                "tsConfig": "apps/veeqo/tsconfig.json",
+                "assets": []
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "veeqo:build",
+                "inspect": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "veeqo:build"
+                },
+                "production": {
+                  "buildTarget": "veeqo:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "apps/veeqo/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore"
+              ]
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/veeqo/jest.config.cjs",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "coverageReporters": [
+                    "text"
+                  ]
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+              ]
+            },
+            "typecheck": {
+              "executor": "@nx/js:tsc",
+              "options": {
+                "tsConfig": "apps/veeqo/tsconfig.json",
+                "noEmit": true
+              },
+              "configurations": {},
+              "parallelism": true
             }
           },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/veeqo/src",
+          "projectType": "application",
           "implicitDependencies": []
         }
       }
@@ -840,9 +1226,16 @@
       ],
       "ui-components": [],
       "web-dashboard": [],
-      "mcp-client": [],
-      "@mcp-shipping/easypost-mcp-server": [],
-      "@mcp-shipping/veeqo-mcp-server": []
+      "mcp-client": [
+        {
+          "source": "mcp-client",
+          "target": "@perplexity/shared",
+          "type": "static"
+        }
+      ],
+      "easypost": [],
+      "@perplexity/shared": [],
+      "veeqo": []
     }
   }
 }
